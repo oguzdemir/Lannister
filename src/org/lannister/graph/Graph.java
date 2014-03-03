@@ -53,7 +53,7 @@ public class Graph {
 	}
 	
 	// removes a node from unvisited queue
-	public void setUnvisited(String vertex) {
+	public void setVisited(String vertex) {
 		boolean ret = unvisited.remove(vertex);
 		if(ret)
 			System.out.println("Visited count: " + ++visitedCount);

@@ -45,7 +45,7 @@ public class Explorer extends Agent {
 			else if(percept.getName().equals("position")) {
 				String pos = percept.getParameters().get(0).toString();
 				setPosition(pos);
-				GraphManager.setUnvisited(pos);
+				GraphManager.setVisited(pos);
 			}
 			else if(percept.getName().equals("visibleVertex")) {
 				GraphManager.get().addVertex(percept.getParameters().get(0).toString());

@@ -30,7 +30,7 @@ public class GraphManager {
 		graph.removeUnvisited();
 	}
 	
-	public static void setUnvisited(String vertex) {
-		graph.setUnvisited(vertex);
+	public static void setVisited(String vertex) {
+		graph.setVisited(vertex);
 	}
 }
