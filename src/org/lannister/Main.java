@@ -17,12 +17,6 @@ public class Main {
 			agentsController.registerAgent(agent, Explorer.class);
 		
 		agentsController.start();
-		
-		boolean running = EIManager.isRunning();
-		while(running) {
-			agentsController.perform();
-			running = EIManager.isRunning();
-		}
 	}
 
 }

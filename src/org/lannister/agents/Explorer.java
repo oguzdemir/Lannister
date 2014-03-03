@@ -1,5 +1,6 @@
 package org.lannister.agents;
 
+import java.util.LinkedList;
 import java.util.List;
 
 import org.lannister.EIManager;
@@ -17,7 +18,7 @@ public class Explorer extends Agent {
 	private boolean newStep = false;
 	
 	private String targetVertex;
-	private List<String> path;
+	private List<String> path = new LinkedList<String>();
 	
 	public Explorer(String name) {
 		super(name);
@@ -29,7 +30,7 @@ public class Explorer extends Agent {
 	}
 
 	private void handlePercepts() {
-		List<Percept> percepts = EIManager.getPercepts(getName());
+		List<Percept> percepts = EIManager.getPercepts(getAgentName());
 		
 		for(Percept percept : percepts) {
 			if(percept.getName().equals("step")) {
@@ -67,7 +68,7 @@ public class Explorer extends Agent {
 			GraphManager.get().allPairsShortestPath();
 			
 			// plan a mission, if not available
-			if(path == null || path.isEmpty()) {
+			if(path.isEmpty()) {
 				print("Path is finished, finding a new one.");
 				startMission();
 			}

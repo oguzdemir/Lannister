@@ -1,12 +1,14 @@
 package org.lannister.agents;
 
+import org.lannister.EIManager;
+
 import eis.iilang.Action;
 import eis.iilang.Percept;
 
 /**
 author = 'Oguz Demir'
  */
-public abstract class Agent {
+public abstract class Agent extends Thread {
 
 	private String name;
 	private int step = -1;
@@ -17,7 +19,7 @@ public abstract class Agent {
 		this.name = name;
 	}
 	
-	public String getName() {
+	public String getAgentName() {
 		return name;
 	}
 	
@@ -42,7 +44,22 @@ public abstract class Agent {
 	}
 	
 	protected void print(Object o) {
-		System.out.println("[Agent - " + getName() + ": " + o);
+		System.out.println("[Agent - " + getAgentName() + ": " + o);
+	}
+	
+	public void run() {
+		boolean running = EIManager.isRunning();
+		
+		while(running) {
+			
+			Action action = perform();
+			
+			if(action != null) {
+				EIManager.act(getAgentName(), action);
+			}
+			
+			running = EIManager.isRunning();
+		}
 	}
 	
 	public abstract void handlePercept(Percept percept);

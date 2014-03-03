@@ -45,7 +45,7 @@ public class AgentsController implements AgentListener {
 			Action action = agent.perform();
 			
 			if(action != null) {
-				EIManager.act(agent.getName(), action);
+				EIManager.act(agent.getAgentName(), action);
 			}
 		}
 	}
@@ -55,7 +55,12 @@ public class AgentsController implements AgentListener {
 		return "connectionA1";
 	}
 	
+	// Start all Agents to execute
 	public void start() {
 		EIManager.start();
+		
+		for(Agent agent : agents.values()) {
+			agent.start();
+		}
 	}
 }
