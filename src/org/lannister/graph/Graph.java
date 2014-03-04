@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
 
 public class Graph {
@@ -15,48 +16,75 @@ public class Graph {
 	private Map<String, Map<String, Integer>> dist  = new HashMap<String, Map<String, Integer>>();
 	private Map<String, Map<String, String>> next  = new HashMap<String, Map<String, String>>(); 
 	
-	private List<String> unvisited = new LinkedList<String>();
+	//private List<String> unvisited = new LinkedList<String>();
+	private Map<String, Boolean> visited = new HashMap<String, Boolean>();
+	
 	
 	public void addVertex(String v1) {
 		if(!graph.containsKey(v1)) {
-			unvisited.add(0, v1);
+			visited.put(v1, false);
 			graph.put(v1, new HashMap<String, Integer>());
 		}
 	}
 
 	public void addEdge(String v1, String v2, Integer w) {
 		if(!graph.containsKey(v1)) {
-			unvisited.add(0, v1);
+			visited.put(v1, false);
 			graph.put(v1, new HashMap<String, Integer>());
 		}
 		if(!graph.get(v1).containsKey(v2))
 			graph.get(v1).put(v2, w);
 
 		if(!graph.containsKey(v2)) {
-			unvisited.add(0, v2);
+			visited.put(v2, false);
 			graph.put(v2, new HashMap<String, Integer>());
 		}
 		if(!graph.get(v2).containsKey(v1))
 			graph.get(v2).put(v1, w);
 	}
 	
-	// returns an unvisited node
-	public String getUnvisited() {
-		String node = unvisited.get(0);
+	// returns an unvisited node, which is closest to current position (bfs)
+	public String getUnvisited(String position) {
+		Queue<String> 		 q = new LinkedList<String>();
+		Map<String, Boolean> v = new HashMap<String, Boolean>();
 		
-		return node;
-	}
-	
-	// removes a visited node
-	public void removeUnvisited() {
-		unvisited.remove(0);
+		q.add(position);
+		v.put(position, true);
+		
+		while(!q.isEmpty()) {
+			
+			// current vertex
+			String cur = q.remove();
+			
+			// return is not visited before
+			if(visited.get(cur) == false) {
+				return cur;
+			}
+			
+			// add unexplored neighbors to the queue
+			for(String neighbor : graph.get(cur).keySet()) {
+				if(!v.containsKey(neighbor)) {
+					v.put(neighbor, true);
+					q.add(neighbor);
+				}
+			}
+		}
+		
+		// return null if there is no unvisited found
+		return null;
 	}
 	
 	// removes a node from unvisited queue
 	public void setVisited(String vertex) {
-		boolean ret = unvisited.remove(vertex);
-		if(ret)
+		boolean ret = visited.get(vertex);
+		if(!ret)
 			System.out.println("Visited count: " + ++visitedCount);
+		visited.put(vertex, true);
+	}
+	
+	// returns true if a vertex is seen before
+	public boolean isKnown(String vertex) {
+		return graph.containsKey(vertex);
 	}
 	
 	// finding shortest paths between every pair of node

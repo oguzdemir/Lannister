@@ -16,7 +16,11 @@ public class Main {
 		for(String agent : agents)
 			agentsController.registerAgent(agent, Explorer.class);
 		
+		// start agents
 		agentsController.start();
+		
+		// start messaging
+		agentsController.createMessager().start();
 	}
 
 }

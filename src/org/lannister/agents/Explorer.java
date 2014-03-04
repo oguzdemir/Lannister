@@ -17,8 +17,8 @@ public class Explorer extends Agent {
 
 	private boolean newStep = false;
 	
-	private String targetVertex;
-	private List<String> path = new LinkedList<String>();
+	private List<String> path 			= new LinkedList<String>();
+	private List<String> goalVertices 	= new LinkedList<String>();
 	
 	public Explorer(String name) {
 		super(name);
@@ -29,6 +29,19 @@ public class Explorer extends Agent {
 		
 	}
 
+	@Override
+	public void handleMessage(String message) {
+		String goalVertex = message;
+		
+		if(GraphManager.isKnown(goalVertex)) {
+			print("I know where " + goalVertex + " is, will try to reach there in the next step!");
+			goalVertices.add(goalVertex);
+		}
+		else {
+			print("I have no idea where " + goalVertex + " is.");
+		}
+	}
+	
 	private void handlePercepts() {
 		List<Percept> percepts = EIManager.getPercepts(getAgentName());
 		
@@ -67,25 +80,37 @@ public class Explorer extends Agent {
 			// update distance matrix
 			GraphManager.get().allPairsShortestPath();
 			
-			// plan a mission, if not available
-			if(path.isEmpty()) {
+			// if there is a goal vertex from messager, plan to go there
+			if(!goalVertices.isEmpty()) {
+				startMission(goalVertices.remove(0));
+			}
+			
+			// if there is no longer vertices to visit, plan a new mission to an unvisited vertex
+			else if(path.isEmpty()) {
 				print("Path is finished, finding a new one.");
 				startMission();
 			}
 			
 			// act
 			String nextVertex = path.remove(0);
+			print("Going to " + nextVertex);
 			return new Action("goto", new Identifier(nextVertex));
 		}
 		return null;
 	}
-
+	
 	private void startMission() {
 		print("Starting a mission!");
 		
-		// get unvisited vertex
-		targetVertex = GraphManager.getUnvisited();
+		// get closest unvisited vertex
+		String targetVertex = GraphManager.getUnvisited(getPosition());
 		
+		if(targetVertex != null) {
+			startMission(targetVertex);
+		}
+	}
+	
+	private void startMission(String targetVertex) {
 		print("Target vertex: " + targetVertex);
 		
 		// plan traversing path
@@ -93,5 +118,4 @@ public class Explorer extends Agent {
 		
 		print("Path: " + path);
 	}
-	
 }

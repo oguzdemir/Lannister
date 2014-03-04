@@ -21,15 +21,15 @@ public class GraphManager {
 		return get().findPath(s, d);
 	}
 	
-	public static synchronized String getUnvisited() {
-		return get().getUnvisited();
-	}
-	
-	public static synchronized void removeUnvisited() {
-		get().removeUnvisited();
+	public static synchronized String getUnvisited(String position) {
+		return get().getUnvisited(position);
 	}
 	
 	public static synchronized void setVisited(String vertex) {
 		get().setVisited(vertex);
+	}
+	
+	public static synchronized boolean isKnown(String vertex) {
+		return get().isKnown(vertex);
 	}
 }

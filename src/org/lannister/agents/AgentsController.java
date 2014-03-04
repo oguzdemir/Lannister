@@ -52,4 +52,8 @@ public class AgentsController implements AgentListener {
 			agent.start();
 		}
 	}
+	
+	public AgentsMessager createMessager() {
+		return new AgentsMessager(agents);
+	}
 }

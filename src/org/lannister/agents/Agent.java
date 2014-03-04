@@ -44,7 +44,7 @@ public abstract class Agent extends Thread {
 	}
 	
 	protected void print(Object o) {
-		System.out.println("[Agent - " + getAgentName() + ": " + o);
+		System.out.println("[Agent - " + getAgentName() + "]: " + o);
 	}
 	
 	public void run() {
@@ -63,5 +63,6 @@ public abstract class Agent extends Thread {
 	}
 	
 	public abstract void handlePercept(Percept percept);
+	public abstract void handleMessage(String message);
 	public abstract Action perform();
 }
