@@ -40,16 +40,6 @@ public class AgentsController implements AgentListener {
 		agents.get(agent).handlePercept(percept);
 	}
 	
-	public void perform() {
-		for(Agent agent : agents.values()) {
-			Action action = agent.perform();
-			
-			if(action != null) {
-				EIManager.act(agent.getAgentName(), action);
-			}
-		}
-	}
-	
 	// TODO: Implement, parse from xml.
 	private String getConnection() {
 		return "connectionA1";
