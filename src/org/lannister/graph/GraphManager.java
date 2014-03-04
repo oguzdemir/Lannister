@@ -18,9 +18,7 @@ public class GraphManager {
 	}
 	
 	public static synchronized List<String> path(String s, String d) {
-		List<String> path = get().findPath(s, d);
-		path.remove(0);
-		return path;
+		return get().findPath(s, d);
 	}
 	
 	public static synchronized String getUnvisited() {

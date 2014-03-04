@@ -13,6 +13,7 @@ public class Graph {
 	
 	private Map<String, Map<String, Integer>> graph = new HashMap<String, Map<String, Integer>>();
 	private Map<String, Map<String, Integer>> dist  = new HashMap<String, Map<String, Integer>>();
+	private Map<String, Map<String, String>> next  = new HashMap<String, Map<String, String>>(); 
 	
 	private List<String> unvisited = new LinkedList<String>();
 	
@@ -66,8 +67,10 @@ public class Graph {
 		// initialize with infinity
 		for(String v1 : vertices) {
 			dist.put(v1, new HashMap<String, Integer>());
+			next.put(v1, new HashMap<String, String>());
 			for(String v2 : vertices) {
 				dist.get(v1).put(v2, MAX_INT);
+				next.get(v1).put(v2, null);
 			}
 		}
 		
@@ -86,6 +89,7 @@ public class Graph {
 				String v2 = entry2.getKey();
 				Integer w = entry2.getValue();
 				dist.get(v1).put(v2, w);
+				next.get(v1).put(v2, v2);
 			}
 		}
 		
@@ -96,7 +100,8 @@ public class Graph {
 					Integer init  = dist.get(v1).get(v2);
 					Integer maybe = dist.get(v1).get(v3) + dist.get(v3).get(v2);
 					if(init > maybe) {
-						dist.get(v1).put(v2, maybe);
+						dist.get(v1).put(v2, maybe);            
+						next.get(v1).put(v2, next.get(v1).get(v3)); // next[v1][v2] <- next[v1][v3]
 					}
 				}		
 	}
@@ -104,31 +109,19 @@ public class Graph {
 	// backtracking recursively
 	// takes O(m) time where m is the size of the vertices in the minimum path
 	public List<String> findPath(String s, String d) {
-		Integer distance = dist.get(s).get(d);
-		return findPath(s, d, distance);
-	}
-	
-	private List<String> findPath(String s, String d, Integer distance) {
+		
+		if(dist.get(s).get(d) == MAX_INT) {
+			return null; // NO PATH
+		}
 		
 		List<String> path = new LinkedList<String>();
-		path.add(s);
 		
-		if(s.equals(d)) {
-			return path;
+		String nxt = next.get(s).get(d);
+		while(nxt != null) {
+			path.add(nxt);
+			nxt = next.get(nxt).get(d);
 		}
 		
-		for(Map.Entry<String, Integer> entry : graph.get(s).entrySet()) {
-			String neighbor = entry.getKey();
-			Integer weight  = entry.getValue();
-			Integer left    = dist.get(neighbor).get(d);
-			if(left == distance - weight) {
-				List<String> rest = findPath(neighbor, d, left);
-				path.addAll(rest);
-				return path;
-			}
-		}
-		
-		// should not reach here!
-		return null;
+		return path;
 	}
 }

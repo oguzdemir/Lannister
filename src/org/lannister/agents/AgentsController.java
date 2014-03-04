@@ -6,7 +6,6 @@ import java.util.Map;
 import org.lannister.EIManager;
 
 import eis.AgentListener;
-import eis.iilang.Action;
 import eis.iilang.Percept;
 
 /**
