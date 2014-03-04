@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Set;
 
@@ -11,6 +12,7 @@ public class Graph {
 	
 	private int visitedCount = 0;
 	private int MAX_INT = 1000000000;
+	private int VERTEX_SIZE = 400;
 	
 	private Map<String, Map<String, Integer>> graph = new HashMap<String, Map<String, Integer>>();
 	private Map<String, Map<String, Integer>> dist  = new HashMap<String, Map<String, Integer>>();
@@ -43,35 +45,22 @@ public class Graph {
 			graph.get(v2).put(v1, w);
 	}
 	
-	// returns an unvisited node, which is closest to current position (bfs)
+	// another implementation to get an unvisited closest vertex
+	// take O(n) time where n is the size of vertices
 	public String getUnvisited(String position) {
-		Queue<String> 		 q = new LinkedList<String>();
-		Map<String, Boolean> v = new HashMap<String, Boolean>();
-		
-		q.add(position);
-		v.put(position, true);
-		
-		while(!q.isEmpty()) {
-			
-			// current vertex
-			String cur = q.remove();
-			
-			// return is not visited before
-			if(visited.get(cur) == false) {
-				return cur;
-			}
-			
-			// add unexplored neighbors to the queue
-			for(String neighbor : graph.get(cur).keySet()) {
-				if(!v.containsKey(neighbor)) {
-					v.put(neighbor, true);
-					q.add(neighbor);
+		int minCost = Integer.MAX_VALUE;
+		String unvisitedVertex = null;
+		for(Map.Entry<String, Integer> en : dist.get(position).entrySet()) {
+			String vertex = en.getKey();
+			if(!visited.get(vertex)) {
+				Integer cost  = en.getValue();
+				if(cost < minCost) {
+					minCost = cost;
+					unvisitedVertex = vertex;
 				}
 			}
 		}
-		
-		// return null if there is no unvisited found
-		return null;
+		return unvisitedVertex;
 	}
 	
 	// removes a node from unvisited queue
