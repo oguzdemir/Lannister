@@ -20,6 +20,8 @@ public class Explorer extends Agent {
 	private List<String> path 			= new LinkedList<String>();
 	private List<String> goalVertices 	= new LinkedList<String>();
 	
+	private boolean onGoalMission = false;
+	
 	public Explorer(String name) {
 		super(name);
 	}
@@ -81,13 +83,20 @@ public class Explorer extends Agent {
 			GraphManager.get().allPairsShortestPath();
 			
 			// if there is a goal vertex from messager, plan to go there
-			if(!goalVertices.isEmpty()) {
+			if(!goalVertices.isEmpty() && !onGoalMission) {
 				startMission(goalVertices.remove(0));
+				onGoalMission = true; 
 			}
 			
 			// if there is no longer vertices to visit, plan a new mission to an unvisited vertex
 			else if(path.isEmpty()) {
 				print("Path is finished, finding a new one.");
+				
+				// no more on a goal mission
+				if(onGoalMission) {
+					onGoalMission = !onGoalMission;
+				}
+				
 				startMission();
 			}
 			
