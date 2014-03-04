@@ -12,7 +12,6 @@ public class Graph {
 	
 	private int visitedCount = 0;
 	private int MAX_INT = 1000000000;
-	private int VERTEX_SIZE = 400;
 	
 	private Map<String, Map<String, Integer>> graph = new HashMap<String, Map<String, Integer>>();
 	private Map<String, Map<String, Integer>> dist  = new HashMap<String, Map<String, Integer>>();
@@ -140,5 +139,9 @@ public class Graph {
 		}
 		
 		return path;
+	}
+	
+	public int cost(String s, String d) {
+		return dist.get(s).get(d);
 	}
 }

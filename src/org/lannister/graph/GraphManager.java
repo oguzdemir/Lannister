@@ -21,6 +21,10 @@ public class GraphManager {
 		return get().findPath(s, d);
 	}
 	
+	public static synchronized int cost(String s, String d) {
+		return get().cost(s, d);
+	}
+	
 	public static synchronized String getUnvisited(String position) {
 		return get().getUnvisited(position);
 	}

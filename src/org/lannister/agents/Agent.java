@@ -14,6 +14,7 @@ public abstract class Agent extends Thread {
 	private int step = -1;
 	
 	private String position;
+	private int energy;
 	
 	public Agent(String name) {
 		this.name = name;
@@ -39,6 +40,14 @@ public abstract class Agent extends Thread {
 		this.position = position;
 	}
 	
+	public int getEnergy() {
+		return energy;
+	}
+
+	public void setEnergy(int energy) {
+		this.energy = energy;
+	}
+
 	protected void info() {
 		print("Position: " + position);
 	}

@@ -70,6 +70,9 @@ public class Explorer extends Agent {
 				GraphManager.get().addEdge(percept.getParameters().getFirst().toString(),
 										   percept.getParameters().getLast().toString(), 1);
 			}
+			else if(percept.getName().equals("energy")) {
+				setEnergy(Integer.valueOf(percept.getParameters().get(0).toString()));
+			}
 		}
 	}
 	
@@ -82,49 +85,64 @@ public class Explorer extends Agent {
 			// update distance matrix
 			GraphManager.get().allPairsShortestPath();
 			
-			// if there is a goal vertex from messager, plan to go there
-			if(!goalVertices.isEmpty() && !onGoalMission) {
-				startMission(goalVertices.remove(0));
-				onGoalMission = true; 
-			}
+			Action action;
 			
-			// if there is no longer vertices to visit, plan a new mission to an unvisited vertex
-			else if(path.isEmpty()) {
-				print("Path is finished, finding a new one.");
-				
-				// no more on a goal mission
-				if(onGoalMission) {
-					onGoalMission = !onGoalMission;
-				}
-				
-				startMission();
-			}
+			action = planRecharge();
+			if(action != null) return action;
 			
-			// act
-			String nextVertex = path.remove(0);
-			print("Going to " + nextVertex);
-			return new Action("goto", new Identifier(nextVertex));
+			action = planGoto();
+			if(action != null) return action;
+			
+			return new Action("skip");
 		}
 		return null;
 	}
 	
-	private void startMission() {
-		print("Starting a mission!");
+	// returns a valid recharge action if recharging is necessary, otherwise returns null
+	private Action planRecharge() {
+		updatePath();
 		
-		// get closest unvisited vertex
-		String targetVertex = GraphManager.getUnvisited(getPosition());
+		if(!path.isEmpty()) {
+			String nxt = path.get(0);
+			int cost = GraphManager.cost(getPosition(), nxt);
+			
+			// recharge only if next cost is greater than current energy
+			if(cost > getEnergy()) {
+				return new Action("recharge");
+			}
+		}
 		
-		if(targetVertex != null) {
-			startMission(targetVertex);
+		return null;
+	}
+	
+	// returns a valid goto action if planning to go to a new vertex, otherwise returns null
+	private Action planGoto() {
+		updatePath();
+		
+		if(!path.isEmpty()) {
+			String nxt = path.remove(0);
+			return new Action("goto", new Identifier(nxt));
+		}
+		
+		return null;
+	}
+	
+	//keep path always updated
+	private void updatePath() {
+		if(path.isEmpty()) {
+			print("Updating path..");
+			
+			// update path to goal 
+			if(!goalVertices.isEmpty()) {
+				path = GraphManager.path(getPosition(), goalVertices.remove(0));
+				onGoalMission = true;
+			} 
+			else {
+				String target = GraphManager.getUnvisited(getPosition());
+				path = GraphManager.path(getPosition(), target);
+				onGoalMission = false;
+			}
 		}
 	}
 	
-	private void startMission(String targetVertex) {
-		print("Target vertex: " + targetVertex);
-		
-		// plan traversing path
-		path = GraphManager.path(getPosition(), targetVertex);
-		
-		print("Path: " + path);
-	}
 }
