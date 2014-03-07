@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE conf SYSTEM "helpers/2013/config.dtd">
+<conf>
+	<simulation-server>
+    <network-agent backlog="10" port="12300"/>
+  </simulation-server>
+  
+	<match>
+		<simulation id="sim-2013-NullGraph">
+			<configuration
+				thinning="20"
+				numberOfNodes="20"
+				randomWeight = "0"
+				gradientWeight = "0"
+				minNodeWeight="0"
+				maxNodeWeight="0"
+				minEdgeCost="0"
+				maxEdgeCost="1"
+				randomSeed="42"
+				optimaWeight = "100"
+				blurIterations = "8"
+				optimaPercentage = "5">
+			
+			&actions;
+			&roles;	
+			&achievements;
+				
+			</configuration>
+			
+			<agents>
+        <agent agentclass="massim.competition2013.GraphSimulationAgent" agentcreationclass="massim.competition2013.GraphSimulationAgentParameter" team="red">
+          <configuration roleName="Explorer"/>
+        </agent>
+        
+        <agent agentclass="massim.competition2013.GraphSimulationAgent" agentcreationclass="massim.competition2013.GraphSimulationAgentParameter" team="blue">
+          <configuration roleName="Explorer"/>
+        </agent>
+
+      </agents>
+			
+    </simulation>
+	</match>
+	
+	<accounts>
+		<actionclassmap name="Graph">
+      <actionclass class="massim.competition2013.GraphSimulationAgentAction" id="action"/>
+      <actionclass class="massim.framework.InvalidAction" id="invalid"/>
+    </actionclassmap>
+		
+		<account actionclassmap="Graph" auxtimeout="750" defaultactionclass="massim.competition2013.GraphSimulationAgentAction" maxpacketlength="65536" password="1" team="OE" timeout="2750" username="OE1" />
+		<account actionclassmap="Graph" auxtimeout="750" defaultactionclass="massim.competition2013.GraphSimulationAgentAction" maxpacketlength="65536" password="1" team="NIL" timeout="2750" username="NIL1" />
+	</accounts>
+</conf>
