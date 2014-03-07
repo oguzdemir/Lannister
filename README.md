@@ -23,7 +23,8 @@ warning [massim-2013-1.4-bin.zip]:  319 extra bytes at beginning or within zipfi
 ```
 - start Eclipse, (select workspace as folder where you cloned the project, i.e. parent of "Lannister" folder), import project:
 ```
-File -> Import... -> General/Existing Projects into Workspace -> Next -> Browse (for "Lannister" folder) -> Check "Lannister" entry in "Projects" list -> Finish
+File -> Import... -> General/Existing Projects into Workspace -> Next 
+  -> Browse (for "Lannister" folder) -> Check "Lannister" entry in "Projects" list -> Finish
 ```
 - run
 ```
