@@ -41,7 +41,7 @@ public class AgentsController implements AgentListener {
 	
 	// TODO: Implement, parse from xml.
 	private String getConnection() {
-		return "connectionA1";
+		return "conOE1";
 	}
 	
 	// Start all Agents to execute
