@@ -8,6 +8,8 @@ import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Set;
 
+import com.google.common.collect.Lists;
+
 public class Graph {
 	
 	private int visitedCount = 0;
@@ -15,9 +17,10 @@ public class Graph {
 	
 	private Map<String, Map<String, Integer>> graph = new HashMap<String, Map<String, Integer>>();
 	private Map<String, Map<String, Integer>> dist  = new HashMap<String, Map<String, Integer>>();
-	private Map<String, Map<String, String>> next  = new HashMap<String, Map<String, String>>(); 
 	
-	//private List<String> unvisited = new LinkedList<String>();
+	// predecessors for path finding
+	private Map<String, Map<String, String>> pre  = new HashMap<String, Map<String, String>>(); 
+	
 	private Map<String, Boolean> visited = new HashMap<String, Boolean>();
 	
 	
@@ -83,10 +86,10 @@ public class Graph {
 		// initialize with infinity
 		for(String v1 : vertices) {
 			dist.put(v1, new HashMap<String, Integer>());
-			next.put(v1, new HashMap<String, String>());
+			pre.put(v1, new HashMap<String, String>());
 			for(String v2 : vertices) {
 				dist.get(v1).put(v2, MAX_INT);
-				next.get(v1).put(v2, null);
+				pre.get(v1).put(v2, null);
 			}
 		}
 		
@@ -105,7 +108,7 @@ public class Graph {
 				String v2 = entry2.getKey();
 				Integer w = entry2.getValue();
 				dist.get(v1).put(v2, w);
-				next.get(v1).put(v2, v2);
+				pre.get(v1).put(v2, v1);
 			}
 		}
 		
@@ -117,7 +120,7 @@ public class Graph {
 					Integer maybe = dist.get(v1).get(v3) + dist.get(v3).get(v2);
 					if(init > maybe) {
 						dist.get(v1).put(v2, maybe);            
-						next.get(v1).put(v2, next.get(v1).get(v3)); // next[v1][v2] <- next[v1][v3]
+						pre.get(v1).put(v2, pre.get(v3).get(v2)); // pre[v1][v2] <- pre[v3][v2]
 					}
 				}		
 	}
@@ -126,19 +129,25 @@ public class Graph {
 	// takes O(m) time where m is the size of the vertices in the minimum path
 	public List<String> findPath(String s, String d) {
 		
-		if(dist.get(s).get(d) == MAX_INT) {
-			return null; // NO PATH
+		// no valid path
+		if(cost(s,d) == MAX_INT) {
+			return null;
 		}
 		
 		List<String> path = new LinkedList<String>();
 		
-		String nxt = next.get(s).get(d);
-		while(nxt != null) {
-			path.add(nxt);
-			nxt = next.get(nxt).get(d);
+		String p = d;
+		
+		while(!s.equals(p)) {
+			path.add(p);
+			p = pre(s,p);
 		}
 		
-		return path;
+		return Lists.reverse(path);
+	}
+	
+	private String pre(String s, String d) {
+		return pre.get(s).get(d);
 	}
 	
 	public int cost(String s, String d) {

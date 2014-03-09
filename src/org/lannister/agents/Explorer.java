@@ -88,10 +88,16 @@ public class Explorer extends Agent {
 			Action action;
 			
 			action = planRecharge();
-			if(action != null) return action;
+			if(action != null) {
+				print("Recharging..");
+				return action;
+			}
 			
 			action = planGoto();
-			if(action != null) return action;
+			if(action != null) {
+				print("Goto..");
+				return action;
+			}
 			
 			return new Action("skip");
 		}
@@ -135,11 +141,13 @@ public class Explorer extends Agent {
 			// update path to goal 
 			if(!goalVertices.isEmpty()) {
 				path = GraphManager.path(getPosition(), goalVertices.remove(0));
+				print(path);
 				onGoalMission = true;
 			} 
 			else {
 				String target = GraphManager.getUnvisited(getPosition());
 				path = GraphManager.path(getPosition(), target);
+				print(path);
 				onGoalMission = false;
 			}
 		}
