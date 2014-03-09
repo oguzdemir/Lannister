@@ -73,6 +73,9 @@ public class Explorer extends Agent {
 			else if(percept.getName().equals("energy")) {
 				setEnergy(Integer.valueOf(percept.getParameters().get(0).toString()));
 			}
+			else if(percept.getName().equals("lastActionResult")) {
+				setLastActionResult(percept.getParameters().getFirst().toString());
+			}
 		}
 	}
 	
@@ -86,6 +89,7 @@ public class Explorer extends Agent {
 			GraphManager.get().aps();
 			
 			print("Total perceived vertex size: " + GraphManager.get().size());
+			print("Total visited vertex size: " + GraphManager.get().visited());
 			
 			Action action;
 			
@@ -108,18 +112,9 @@ public class Explorer extends Agent {
 	
 	// returns a valid recharge action if recharging is necessary, otherwise returns null
 	private Action planRecharge() {
-		updatePath();
-		
-		if(!path.isEmpty()) {
-			String nxt = path.get(0);
-			int cost = GraphManager.cost(getPosition(), nxt);
-			
-			// recharge only if next cost is greater than current energy
-			if(cost > getEnergy()) {
-				return new Action("recharge");
-			}
+		if(!getLastActionResult().equals("successful")) {
+			return new Action("recharge");
 		}
-		
 		return null;
 	}
 	

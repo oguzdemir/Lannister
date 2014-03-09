@@ -21,6 +21,7 @@ public class Graph {
 	private int[][]   p = new int[400][400];
 	private boolean[] v = new boolean[400];
 	private int       cur;
+	private int 	  visited;
 	
 	// register a new vertex
 	private void register(String v) {
@@ -60,14 +61,13 @@ public class Graph {
 				cand = j;
 			}
 		}
-		System.out.println(rr.get(cand));
 		return rr.get(cand);
 	}
 	
 	// removes a node from unvisited queue
 	public void setVisited(String vertex) {
 		int i = r.get(vertex);
-		
+		if(!v[i]) visited++;
 		v[i] = true;
 	}
 	
@@ -115,6 +115,10 @@ public class Graph {
 		int i = r.get(source);
 		int j = r.get(dest);
 		return d[i][j];
+	}
+	
+	public int visited() {
+		return visited;
 	}
 	
 	public int size() {

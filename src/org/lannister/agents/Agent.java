@@ -14,6 +14,7 @@ public abstract class Agent extends Thread {
 	private int step = -1;
 	
 	private String position;
+	private String lastActionResult;
 	private int energy;
 	
 	public Agent(String name) {
@@ -46,6 +47,14 @@ public abstract class Agent extends Thread {
 
 	public void setEnergy(int energy) {
 		this.energy = energy;
+	}
+
+	public String getLastActionResult() {
+		return lastActionResult;
+	}
+
+	public void setLastActionResult(String lastActionResult) {
+		this.lastActionResult = lastActionResult;
 	}
 
 	protected void info() {
