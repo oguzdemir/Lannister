@@ -17,6 +17,8 @@ public abstract class Agent extends Thread {
 	private String lastActionResult;
 	private int energy;
 	
+	protected int THRESHOLD_ENERGY = 5;
+	
 	public Agent(String name) {
 		this.name = name;
 	}
