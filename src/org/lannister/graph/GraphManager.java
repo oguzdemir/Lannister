@@ -18,7 +18,7 @@ public class GraphManager {
 	}
 	
 	public static synchronized List<String> path(String s, String d) {
-		return get().findPath(s, d);
+		return get().path(s, d);
 	}
 	
 	public static synchronized int cost(String s, String d) {
@@ -35,5 +35,9 @@ public class GraphManager {
 	
 	public static synchronized boolean isKnown(String vertex) {
 		return get().isKnown(vertex);
+	}
+	
+	public static int getSize() {
+		return get().size();
 	}
 }

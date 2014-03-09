@@ -83,7 +83,9 @@ public class Explorer extends Agent {
 			info();
 			
 			// update distance matrix
-			GraphManager.get().allPairsShortestPath();
+			GraphManager.get().aps();
+			
+			print("Total perceived vertex size: " + GraphManager.get().size());
 			
 			Action action;
 			
