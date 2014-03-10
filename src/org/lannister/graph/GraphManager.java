@@ -1,6 +1,6 @@
 package org.lannister.graph;
 
-import java.util.List;
+import java.util.LinkedList;
 
 public class GraphManager {
 
@@ -17,7 +17,7 @@ public class GraphManager {
 		return graph;
 	}
 	
-	public static synchronized List<String> path(String s, String d) {
+	public static synchronized LinkedList<String> path(String s, String d) {
 		return get().path(s, d);
 	}
 	

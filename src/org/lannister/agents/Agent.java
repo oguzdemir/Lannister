@@ -14,10 +14,11 @@ public abstract class Agent extends Thread {
 	private int step = -1;
 	
 	private String position;
+	private String lastAction;
 	private String lastActionResult;
 	private int energy;
 	
-	protected int THRESHOLD_ENERGY = 5;
+	protected int THRESHOLD_ENERGY = 10;
 	
 	public Agent(String name) {
 		this.name = name;
@@ -51,6 +52,14 @@ public abstract class Agent extends Thread {
 		this.energy = energy;
 	}
 
+	public String getLastAction() {
+		return lastAction;
+	}
+
+	public void setLastAction(String lastAction) {
+		this.lastAction = lastAction;
+	}
+
 	public String getLastActionResult() {
 		return lastActionResult;
 	}
@@ -60,7 +69,11 @@ public abstract class Agent extends Thread {
 	}
 
 	protected void info() {
+		print("Step: " + step);
 		print("Position: " + position);
+		print("Energy: " + energy);
+		print("Last action: " + lastAction);
+		print("Last Action Result: " + lastActionResult);
 	}
 	
 	protected void print(Object o) {

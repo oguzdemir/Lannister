@@ -95,7 +95,7 @@ public class Graph {
 				}
 	}
 	
-	public List<String> path(String s, String d) {
+	public LinkedList<String> path(String s, String d) {
 		int i = r.get(s);
 		int j = r.get(d);
 		
@@ -108,7 +108,7 @@ public class Graph {
 			pre = p[i][pre];
 		}
 		
-		return Lists.reverse(path);
+		return new LinkedList(Lists.reverse(path));
 	}
 	
 	public int cost(String source, String dest) {
