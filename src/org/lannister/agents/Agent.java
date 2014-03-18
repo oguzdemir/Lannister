@@ -1,9 +1,9 @@
 package org.lannister.agents;
 
 import org.lannister.EIManager;
+import org.lannister.messaging.AgentsMessenger;
 
 import eis.iilang.Action;
-import eis.iilang.Percept;
 
 /**
 author = 'Oguz Demir'
@@ -19,6 +19,8 @@ public abstract class Agent extends Thread {
 	private int energy;
 	
 	protected int THRESHOLD_ENERGY = 10;
+	
+	protected AgentsMessenger messenger;
 	
 	public Agent(String name) {
 		this.name = name;
@@ -68,6 +70,14 @@ public abstract class Agent extends Thread {
 		this.lastActionResult = lastActionResult;
 	}
 
+	public AgentsMessenger getMessenger() {
+		return messenger;
+	}
+
+	public void setMessenger(AgentsMessenger messenger) {
+		this.messenger = messenger;
+	}
+
 	protected void info() {
 		print("Step: " + step);
 		print("Position: " + position);
@@ -95,7 +105,11 @@ public abstract class Agent extends Thread {
 		}
 	}
 	
-	public abstract void handlePercept(Percept percept);
-	public abstract void handleMessage(String message);
+	
+	
+	/**
+	 * Plans an action according to current beliefs.
+	 * @return
+	 */
 	public abstract Action perform();
 }

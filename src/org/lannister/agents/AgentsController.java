@@ -1,19 +1,23 @@
 package org.lannister.agents;
 
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 
 import org.lannister.EIManager;
-
-import eis.AgentListener;
-import eis.iilang.Percept;
+import org.lannister.messaging.AgentsMessenger;
 
 /**
 author = 'Oguz Demir'
  */
-public class AgentsController implements AgentListener {
+public class AgentsController {
 
 	private Map<String, Agent> agents;
+	
+	private LinkedList<String> connections = new LinkedList<String>() {{
+		add("connectionA1");
+		add("connectionA2");
+	}};
 	
 	public AgentsController() {
 		agents = new HashMap<String, Agent>();
@@ -27,21 +31,21 @@ public class AgentsController implements AgentListener {
 			// add it to Environment interface
 			EIManager.register(name);
 			EIManager.associate(name, getConnection());
-			EIManager.attachListener(name, this);
 			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 	
-	@Override
-	public void handlePercept(String agent, Percept percept) {
-		agents.get(agent).handlePercept(percept);
+	private void registerMessenger(AgentsMessenger messenger) {
+		for(Agent agent : agents.values()) {
+			agent.setMessenger(messenger);
+		}
 	}
 	
 	// TODO: Implement, parse from xml.
 	private String getConnection() {
-		return "connectionA1";
+		return connections.removeFirst();
 	}
 	
 	// Start all Agents to execute
@@ -53,7 +57,7 @@ public class AgentsController implements AgentListener {
 		}
 	}
 	
-	public AgentsMessager createMessager() {
-		return new AgentsMessager(agents);
+	public void enableMessaging() {
+		registerMessenger(new AgentsMessenger(agents));
 	}
 }

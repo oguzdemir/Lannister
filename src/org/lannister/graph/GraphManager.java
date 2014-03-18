@@ -1,43 +1,17 @@
 package org.lannister.graph;
 
-import java.util.LinkedList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class GraphManager {
 
-	/**
-	 * Singleton graph instance, any operation done on Graph should be one at a time.
-	 */
-	private static Graph graph;
+	private static Map<String, Graph> graphs = new HashMap<String, Graph>();
 	
-	public static synchronized Graph get() {
-		if(graph == null) {
-			graph = new Graph();
+	public static synchronized Graph get(String agentName) {
+		if(graphs.get(agentName) == null) {
+			graphs.put(agentName, new Graph());
 		}
 		
-		return graph;
-	}
-	
-	public static synchronized LinkedList<String> path(String s, String d) {
-		return get().path(s, d);
-	}
-	
-	public static synchronized int cost(String s, String d) {
-		return get().cost(s, d);
-	}
-	
-	public static synchronized String getUnvisited(String position) {
-		return get().getUnvisited(position);
-	}
-	
-	public static synchronized void setVisited(String vertex) {
-		get().setVisited(vertex);
-	}
-	
-	public static synchronized boolean isKnown(String vertex) {
-		return get().isKnown(vertex);
-	}
-	
-	public static int getSize() {
-		return get().size();
+		return graphs.get(agentName);
 	}
 }

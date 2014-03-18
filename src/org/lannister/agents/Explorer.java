@@ -5,9 +5,9 @@ import java.util.List;
 
 import org.lannister.EIManager;
 import org.lannister.graph.GraphManager;
+import org.lannister.messaging.Message;
 import org.lannister.util.ActionResults;
 import org.lannister.util.Actions;
-import org.omg.PortableServer.THREAD_POLICY_ID;
 
 import eis.iilang.Action;
 import eis.iilang.Identifier;
@@ -21,29 +21,10 @@ public class Explorer extends Agent {
 	private boolean newStep = false;
 	
 	private LinkedList<String> path 		= new LinkedList<String>();
-	private LinkedList<String> goalVertices = new LinkedList<String>();
 	private String next;
 	
 	public Explorer(String name) {
 		super(name);
-	}
-
-	@Override
-	public void handlePercept(Percept percept) {
-		
-	}
-
-	@Override
-	public void handleMessage(String message) {
-		String goalVertex = message;
-		
-		if(GraphManager.isKnown(goalVertex)) {
-			print("I know where " + goalVertex + " is, will try to reach there in the next step!");
-			goalVertices.add(goalVertex);
-		}
-		else {
-			print("I have no idea where " + goalVertex + " is.");
-		}
 	}
 	
 	private void handlePercepts() {
@@ -63,14 +44,17 @@ public class Explorer extends Agent {
 			else if(percept.getName().equals("position")) {
 				String pos = percept.getParameters().get(0).toString();
 				setPosition(pos);
-				GraphManager.setVisited(pos);
+				GraphManager.get(getAgentName()).setVisited(pos);
+				messenger.broadcast(new Message(getAgentName(), percept));
 			}
 			else if(percept.getName().equals("visibleVertex")) {
-				GraphManager.get().addVertex(percept.getParameters().get(0).toString());
+				GraphManager.get(getAgentName()).addVertex(percept.getParameters().get(0).toString());
+				messenger.broadcast(new Message(getAgentName(), percept));
 			}
 			else if(percept.getName().equals("visibleEdge")) {
-				GraphManager.get().addEdge(percept.getParameters().getFirst().toString(),
+				GraphManager.get(getAgentName()).addEdge(percept.getParameters().getFirst().toString(),
 										   percept.getParameters().getLast().toString(), 1);
+				messenger.broadcast(new Message(getAgentName(), percept));
 			}
 			else if(percept.getName().equals("energy")) {
 				setEnergy(Integer.valueOf(percept.getParameters().get(0).toString()));
@@ -84,17 +68,38 @@ public class Explorer extends Agent {
 		}
 	}
 	
+	private void handleMessages() {
+		List<Message> messages = messenger.popMessages(getAgentName());
+		
+		for(Message message : messages) {
+			String fromAgent = message.getFrom();
+			Percept percept  = message.getPercept();
+			
+			if(percept.getName().equals("visibleVertex")) {
+				GraphManager.get(getAgentName()).addVertex(percept.getParameters().get(0).toString());
+			} 
+			else if(percept.getName().equals("visibleEdge")) {
+				GraphManager.get(getAgentName()).addEdge(percept.getParameters().getFirst().toString(),
+						   percept.getParameters().getLast().toString(), 1);
+			}
+			else if(percept.getName().equals("position")) {
+				GraphManager.get(getAgentName()).setVisited(percept.getParameters().get(0).toString());
+			}
+		}
+	}
+	
 	@Override
 	public Action perform() {
 		handlePercepts();
+		handleMessages();
 		if(newStep) {
 			info();
 			
 			// update distance matrix
-			GraphManager.get().aps();
+			GraphManager.get(getAgentName()).aps();
 			
-			print("Total perceived vertex size: " + GraphManager.get().size());
-			print("Total visited vertex size: " + GraphManager.get().visited());
+			print("Total perceived vertex size: " + GraphManager.get(getAgentName()).size());
+			print("Total visited vertex size: " + GraphManager.get(getAgentName()).visited());
 			
 			handleFailedGotoAction();
 			
@@ -142,17 +147,10 @@ public class Explorer extends Agent {
 	private void updatePath() {
 		if(path.isEmpty()) {
 			print("Updating path..");
-			
-			// update path to goal 
-			if(!goalVertices.isEmpty()) {
-				path = GraphManager.path(getPosition(), goalVertices.remove(0));
-				print(path);
-			} 
-			else {
-				String target = GraphManager.getUnvisited(getPosition());
-				path = GraphManager.path(getPosition(), target);
-				print(path);
-			}
+			 
+			String target = GraphManager.get(getAgentName()).getUnvisited(getPosition());
+			path = GraphManager.get(getAgentName()).path(getPosition(), target);
+			print(path);
 		}
 	}
 	

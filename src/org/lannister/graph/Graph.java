@@ -108,7 +108,7 @@ public class Graph {
 			pre = p[i][pre];
 		}
 		
-		return new LinkedList(Lists.reverse(path));
+		return new LinkedList<String>(Lists.reverse(path));
 	}
 	
 	public int cost(String source, String dest) {

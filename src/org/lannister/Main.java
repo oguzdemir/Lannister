@@ -7,7 +7,7 @@ public class Main {
 
 	private static AgentsController agentsController;
 	
-	private static String[] agents = { "LannisterExplorer1" }; 
+	private static String[] agents = { "LannisterExplorer1", "LannisterExplorer2" }; 
 	
 	public static void main(String[] args) {
 		
@@ -16,11 +16,12 @@ public class Main {
 		for(String agent : agents)
 			agentsController.registerAgent(agent, Explorer.class);
 		
+		// enable messaging between agents
+		agentsController.enableMessaging();
+		
 		// start agents
 		agentsController.start();
 		
-		// start messaging
-		agentsController.createMessager().start();
 	}
 
 }
