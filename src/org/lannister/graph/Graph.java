@@ -1,5 +1,6 @@
 package org.lannister.graph;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -15,6 +16,8 @@ public class Graph {
 	private Map<String, Integer> r = new HashMap<String, Integer>();
 	// reverse map of internal representation of nodes
 	private Map<Integer, String> rr = new HashMap<Integer, String>();
+	// probed information of nodes
+	private Map<String, Integer> pr = new HashMap<String, Integer>();
 	
 	private int[][]   g = new int[400][400]; // all zero initially
 	private int[][]   d = new int[400][400]; // all zero initially
@@ -31,16 +34,16 @@ public class Graph {
 	}
 	
 	public void addVertex(String v1) {
-		if(!r.containsKey(v1)) {
+		if(!isKnown(v1)) {
 			register(v1);
 		}
 	}
 	
 	public void addEdge(String v1, String v2, Integer w) {
-		if(!r.containsKey(v1)) {
+		if(!isKnown(v1)) {
 			register(v1);
 		}
-		if(!r.containsKey(v2)) {
+		if(!isKnown(v2)) {
 			register(v2);
 		}
 		int i = r.get(v1);
@@ -48,15 +51,23 @@ public class Graph {
 		g[i][j] = g[j][i] = w;
 	}
 	
-	// another implementation to get an unvisited closest vertex
-	// take O(n) time where n is the size of vertices
-	public String getUnvisited(String position) {
+	// gets an unvisited closest vertex that no other agent is targetted that vertex.
+	// takes O(n) time where n is the size of vertices
+	public String getUnvisited(String position, Collection<String> otherAgentsTargets) {
+		
+		// register target nodes if they are not known by the 
+		for(String target : otherAgentsTargets) {
+			if(!isKnown(target)) {
+				register(target);
+			}
+		}
+		
 		int cost = Integer.MAX_VALUE;
 		int i    = r.get(position);
 		int cand = 0;
 		
 		for(int j = 0; j < cur; j++) {
-			if(!v[j] && cost > d[i][j]) {
+			if(!v[j] && cost > d[i][j] && !otherAgentsTargets.contains(rr.get(j))) {
 				cost = d[i][j];
 				cand = j;
 			}
@@ -66,9 +77,22 @@ public class Graph {
 	
 	// removes a node from unvisited queue
 	public void setVisited(String vertex) {
+		// register if not known
+		if(!isKnown(vertex)) {
+			register(vertex);
+		}
+		
 		int i = r.get(vertex);
 		if(!v[i]) visited++;
 		v[i] = true;
+	}
+	
+	public boolean isProbed(String vertex) {
+		return pr.containsKey(vertex);
+	}
+	
+	public void setProbed(String vertex, Integer weight) {
+		pr.put(vertex, weight);
 	}
 	
 	// returns true if a vertex is seen before
@@ -109,12 +133,6 @@ public class Graph {
 		}
 		
 		return new LinkedList<String>(Lists.reverse(path));
-	}
-	
-	public int cost(String source, String dest) {
-		int i = r.get(source);
-		int j = r.get(dest);
-		return d[i][j];
 	}
 	
 	public int visited() {
