@@ -75,6 +75,30 @@ public class Graph {
 		return !v[cand] ? rr.get(cand) : null;
 	}
 	
+	// gets an unprobed closest vertex that no other agent is targetted that vertex.
+	// takes O(n) time where n is the size of vertices
+	public String getUnprobed(String vertex, Collection<String> otherAgentsTargets) {
+		// register target nodes if they are not known by the agent
+		for(String target : otherAgentsTargets) {
+			if(!isKnown(target)) {
+				register(target);
+			}
+		}
+		
+		int cost = Integer.MAX_VALUE;
+		int i    = r.get(vertex);
+		int cand = 0;
+		
+		for(int j = 0; j < cur; j++) {
+			String v = rr.get(j);
+			if(!pr.containsKey(v) && cost > d[i][j] && !otherAgentsTargets.contains(rr.get(j))) {
+				cost = d[i][j];
+				cand = j;
+			}
+		}
+		return !pr.containsKey(rr.get(cand)) ? rr.get(cand) : null;
+	}
+	
 	// removes a node from unvisited queue
 	public void setVisited(String vertex) {
 		// register if not known
@@ -99,7 +123,7 @@ public class Graph {
 		return isProbed(vertex) ? pr.get(vertex) : 0;
 	}
 	
-	// returns closest vertex which has probe value more than threshold
+	// returns best closest vertex to probe
 	public String getBestProbe(String vertex) {
 		int i = r.get(vertex);
 		int cand = i;

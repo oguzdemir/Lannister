@@ -1,7 +1,7 @@
 package org.lannister.agents;
 
 import org.lannister.EIManager;
-import org.lannister.messaging.AgentsMessenger;
+import org.lannister.messaging.AgentsCoordinator;
 import org.lannister.util.ActionResults;
 import org.lannister.util.Actions;
 
@@ -22,7 +22,7 @@ public abstract class Agent extends Thread {
 	private int energy;
 	
 	protected AgentMode mode;
-	protected AgentsMessenger messenger;
+	protected AgentsCoordinator coordinator;
 	
 	public Agent(String name) {
 		this.name = name;
@@ -72,12 +72,12 @@ public abstract class Agent extends Thread {
 		this.lastActionResult = lastActionResult;
 	}
 
-	public AgentsMessenger getMessenger() {
-		return messenger;
+	public AgentsCoordinator getCoordinator() {
+		return coordinator;
 	}
 
-	public void setMessenger(AgentsMessenger messenger) {
-		this.messenger = messenger;
+	public void setCoordinator(AgentsCoordinator coordinator) {
+		this.coordinator = coordinator;
 	}
 
 	protected void info() {

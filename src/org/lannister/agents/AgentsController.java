@@ -5,7 +5,7 @@ import java.util.LinkedList;
 import java.util.Map;
 
 import org.lannister.EIManager;
-import org.lannister.messaging.AgentsMessenger;
+import org.lannister.messaging.AgentsCoordinator;
 
 /**
 author = 'Oguz Demir'
@@ -43,9 +43,9 @@ public class AgentsController {
 		}
 	}
 	
-	private void registerMessenger(AgentsMessenger messenger) {
+	private void registerCoordinator(AgentsCoordinator coordinator) {
 		for(Agent agent : agents.values()) {
-			agent.setMessenger(messenger);
+			agent.setCoordinator(coordinator);
 		}
 	}
 	
@@ -63,7 +63,7 @@ public class AgentsController {
 		}
 	}
 	
-	public void enableMessaging() {
-		registerMessenger(new AgentsMessenger(agents));
+	public void enableCoordinating() {
+		registerCoordinator(new AgentsCoordinator(agents));
 	}
 }

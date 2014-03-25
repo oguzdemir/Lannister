@@ -1,6 +1,7 @@
 package org.lannister.messaging;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,11 +11,12 @@ import org.lannister.agents.Agent;
 /**
 author = 'Oguz Demir'
  */
-public class AgentsMessenger {
+public class AgentsCoordinator {
 
+	private Map<String, String> 		targets  = new HashMap<String, String>(); 
 	private Map<String, List<Message>> 	messages = new HashMap<String, List<Message>>();
 	
-	public AgentsMessenger(Map<String, Agent> agents) {
+	public AgentsCoordinator(Map<String, Agent> agents) {
 		for(String agentName : agents.keySet()) {
 			messages.put(agentName, new ArrayList<Message>());
 		}
@@ -47,4 +49,26 @@ public class AgentsMessenger {
 		
 		return m;
 	}
+	
+	/**
+	 * Updates target list for the agent.
+	 * @param agentName
+	 * @param target
+	 */
+	public synchronized boolean registerTarget(String agentName, String target) {
+		if(!targets.containsValue(target)) {
+			targets.put(agentName, target);
+			return true;
+		}
+		return false;
+	}
+	
+	/**
+	 * Returns current targets.
+	 * @return
+	 */
+	public Collection<String> getTargets() {
+		return targets.values();
+	}
+	
 }

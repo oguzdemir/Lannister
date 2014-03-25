@@ -21,9 +21,6 @@ author = 'Oguz Demir'
  */
 public class Explorer extends Agent {
 	
-	// target nodes of other agents
-	private Map<String, String> targets = new HashMap<String, String>();
-	
 	// path to the target node
 	private LinkedList<String> path = new LinkedList<String>();
 	
@@ -54,16 +51,16 @@ public class Explorer extends Agent {
 				String pos = percept.getParameters().getFirst().toString();
 				setPosition(pos);
 				GraphManager.get(getAgentName()).setVisited(pos);
-				messenger.broadcast(new Message(getAgentName(), percept));
+				coordinator.broadcast(new Message(getAgentName(), percept));
 			}
 			else if(percept.getName().equals("visibleVertex")) {
 				GraphManager.get(getAgentName()).addVertex(percept.getParameters().getFirst().toString());
-				messenger.broadcast(new Message(getAgentName(), percept));
+				coordinator.broadcast(new Message(getAgentName(), percept));
 			}
 			else if(percept.getName().equals("visibleEdge")) {
 				GraphManager.get(getAgentName()).addEdge(percept.getParameters().getFirst().toString(),
 										   percept.getParameters().getLast().toString(), 1);
-				messenger.broadcast(new Message(getAgentName(), percept));
+				coordinator.broadcast(new Message(getAgentName(), percept));
 			}
 			else if(percept.getName().equals("energy")) {
 				setEnergy(Integer.valueOf(percept.getParameters().getFirst().toString()));
@@ -77,14 +74,14 @@ public class Explorer extends Agent {
 			else if(percept.getName().equals("probedVertex")) {
 				GraphManager.get(getAgentName()).setProbed(percept.getParameters().getFirst().toString(),
 														Integer.valueOf(percept.getParameters().getLast().toString()));
-				messenger.broadcast(new Message(getAgentName(), percept));
+				coordinator.broadcast(new Message(getAgentName(), percept));
 			}
 		}
 	}
 	
 	@Override
 	protected void handleMessages() {
-		List<Message> messages = messenger.popMessages(getAgentName());
+		List<Message> messages = coordinator.popMessages(getAgentName());
 		
 		for(Message message : messages) {
 			String fromAgent = message.getFrom();
@@ -103,9 +100,6 @@ public class Explorer extends Agent {
 			else if(percept.getName().equals("probedVertex")) {
 				GraphManager.get(getAgentName()).setProbed(percept.getParameters().getFirst().toString(),
 						Integer.valueOf(percept.getParameters().getLast().toString()));
-			}
-			else if(percept.getName().equals("goingTo")) {
-				targets.put(fromAgent, percept.getParameters().getFirst().toString());
 			}
 		}
 	}
@@ -155,10 +149,13 @@ public class Explorer extends Agent {
 			this.mode = AgentMode.DEFENSIVE;
 		}
 		// update mode to probing if there are no more unvisited nodes
-		else if(GraphManager.get(getAgentName()).getUnvisited(getPosition(), targets.values()) == null) {
+		else if(this.mode == AgentMode.EXPLORING && GraphManager.get(getAgentName()).getUnvisited(getPosition(), coordinator.getTargets()) == null) {
 			this.mode = AgentMode.PROBING;
 		}
-	}
+		else if(this.mode == AgentMode.PROBING && GraphManager.get(getAgentName()).getUnprobed(getPosition(), coordinator.getTargets()) == null) {
+			this.mode = AgentMode.BESTSCORE;
+		}
+ 	}
 	
 	private Action planProbe() {
 		if(shouldProbe()) {
@@ -168,11 +165,13 @@ public class Explorer extends Agent {
 	}
 	
 	// probe if:
-	// 1 - If in Exploring mode, agent is on the target node which is not probed
-	// 2 - If in Probing mode, the node we are sitting has probe value more than the threshold
+	// 1 - agent is on the target node which is not probed
+	// 2 - agent is in BESTSCORE mode and the current node is the best node to probe
 	private boolean shouldProbe() {
-		return (this.mode == AgentMode.EXPLORING && path.isEmpty() && !GraphManager.get(getAgentName()).isProbed(getPosition())) ||
-			   (this.mode == AgentMode.PROBING && GraphManager.get(getAgentName()).probeValue(getPosition()) > Thresholds.PROBE);
+		return (this.mode == AgentMode.EXPLORING && path.isEmpty() && !GraphManager.get(getAgentName()).isProbed(getPosition()))
+				|| (this.mode == AgentMode.PROBING && path.isEmpty() && !GraphManager.get(getAgentName()).isProbed(getPosition()))
+				|| (this.mode == AgentMode.BESTSCORE && getPosition().equals(GraphManager.get(getAgentName()).getBestProbe(getPosition())));
+				
 	}
 	
 	
@@ -215,20 +214,31 @@ public class Explorer extends Agent {
 	private void updatePath() {
 		if(path.isEmpty()) {
 			print("Updating path..");
-			
+
 			String target = null;
 			if(this.mode == AgentMode.EXPLORING) {
-				target = GraphManager.get(getAgentName()).getUnvisited(getPosition(), targets.values());
+				target = GraphManager.get(getAgentName()).getUnvisited(getPosition(), coordinator.getTargets());
 			}
 			else if(this.mode == AgentMode.PROBING) {
+				target = GraphManager.get(getAgentName()).getUnprobed(getPosition(), coordinator.getTargets());
+			}
+			else if(this.mode == AgentMode.BESTSCORE) {
 				target = GraphManager.get(getAgentName()).getBestProbe(getPosition());
 			}
 			
 			// path updated
 			path = GraphManager.get(getAgentName()).path(getPosition(), target);
 			
-			// target informed to other agents
-			messenger.broadcast(new Message(getAgentName(), new Percept("goingTo", new Identifier(target))));
+			// register target to coordinator
+			boolean ret = coordinator.registerTarget(getAgentName(), target);
+			
+			// check for target collision
+			if(this.mode == AgentMode.EXPLORING || this.mode == AgentMode.PROBING) {
+				if(ret == false) {
+					print("Target is collided with another agent..");
+					updatePath();
+				}
+			}
 			
 			print(path);
 		}

@@ -19,8 +19,8 @@ public class Main {
 		for(String agent : agents)
 			agentsController.registerAgent(agent, Explorer.class);
 		
-		// enable messaging between agents
-		agentsController.enableMessaging();
+		// enable coordinating between agents
+		agentsController.enableCoordinating();
 		
 		// start agents
 		agentsController.start();
