@@ -10,6 +10,7 @@ import org.lannister.graph.GraphManager;
 import org.lannister.messaging.Message;
 import org.lannister.util.ActionResults;
 import org.lannister.util.Actions;
+import org.lannister.util.Thresholds;
 
 import eis.iilang.Action;
 import eis.iilang.Identifier;
@@ -19,8 +20,6 @@ import eis.iilang.Percept;
 author = 'Oguz Demir'
  */
 public class Explorer extends Agent {
-
-	private boolean newStep = false;
 	
 	// target nodes of other agents
 	private Map<String, String> targets = new HashMap<String, String>();
@@ -33,10 +32,11 @@ public class Explorer extends Agent {
 	
 	public Explorer(String name) {
 		super(name);
+		this.mode = AgentMode.EXPLORING;
 	}
 	
-	// handles percepts that agents sensors received
-	private void handlePercepts() {
+	@Override
+	protected void handlePercepts() {
 		List<Percept> percepts = EIManager.getPercepts(getAgentName());
 		
 		for(Percept percept : percepts) {
@@ -82,8 +82,8 @@ public class Explorer extends Agent {
 		}
 	}
 	
-	// handles messages received from other agents
-	private void handleMessages() {
+	@Override
+	protected void handleMessages() {
 		List<Message> messages = messenger.popMessages(getAgentName());
 		
 		for(Message message : messages) {
@@ -111,45 +111,53 @@ public class Explorer extends Agent {
 	}
 	
 	@Override
-	public Action perform() {
-		handlePercepts();
-		handleMessages();
-		if(newStep) {
-			info();
-			
-			// update distance matrix
-			GraphManager.get(getAgentName()).aps();
-			
-			print("Total perceived vertex size: " + GraphManager.get(getAgentName()).size());
-			print("Total visited vertex size: " + GraphManager.get(getAgentName()).visited());
-			
-			// we are assuming that a previous goto action should succeed, 
-			// but if somehow we hit an error in goto step, we need to repair the path
-			handleFailedGotoAction();
-			
-			Action action;
-			
-			action = planRecharge();
-			if(action != null) {
-				print("Recharging..");
-				return action;
-			}
-			
-			action = planProbe();
-			if(action != null) {
-				print("Probing..");
-				return action;
-			}
-			
-			action = planGoto();
-			if(action != null) {
-				print("Goto..");
-				return action;
-			}
-			
-			return new Action("skip");
+	protected Action perform() {
+		info();
+		
+		// update distance matrix
+		GraphManager.get(getAgentName()).aps();
+		
+		print("Total perceived vertex size: " + GraphManager.get(getAgentName()).size());
+		print("Total visited vertex size: " + GraphManager.get(getAgentName()).visited());
+		
+		// we are assuming that a previous goto action should succeed, 
+		// but if somehow we hit an error in goto step, we need to repair the path
+		handleFailedGotoAction();
+		
+		Action action;
+		
+		action = planRecharge();
+		if(action != null) {
+			print("Recharging..");
+			return action;
 		}
-		return null;
+		
+		action = planProbe();
+		if(action != null) {
+			print("Probing..");
+			return action;
+		}
+		
+		action = planGoto();
+		if(action != null) {
+			print("Goto..");
+			return action;
+		}
+		
+		print("Skip..");
+		return new Action("skip");
+	}
+	
+	@Override
+	protected void updateMode() {
+		// update mode to defensive if someone is attacking
+		if(getLastActionResult().equals(ActionResults.ATTACKED)) {
+			this.mode = AgentMode.DEFENSIVE;
+		}
+		// update mode to probing if there are no more unvisited nodes
+		else if(GraphManager.get(getAgentName()).getUnvisited(getPosition(), targets.values()) == null) {
+			this.mode = AgentMode.PROBING;
+		}
 	}
 	
 	private Action planProbe() {
@@ -160,9 +168,11 @@ public class Explorer extends Agent {
 	}
 	
 	// probe if:
-	// 1 - On the target node which is not probed
+	// 1 - If in Exploring mode, agent is on the target node which is not probed
+	// 2 - If in Probing mode, the node we are sitting has probe value more than the threshold
 	private boolean shouldProbe() {
-		return path.isEmpty() && !GraphManager.get(getAgentName()).isProbed(getPosition());
+		return (this.mode == AgentMode.EXPLORING && path.isEmpty() && !GraphManager.get(getAgentName()).isProbed(getPosition())) ||
+			   (this.mode == AgentMode.PROBING && GraphManager.get(getAgentName()).probeValue(getPosition()) > Thresholds.PROBE);
 	}
 	
 	
@@ -176,11 +186,11 @@ public class Explorer extends Agent {
 	// recharge if:
 	// 1 - Goto action failed
 	// 2 - Probe action failed
-	// 3 - Energy is below minimum allowed and needs to pass an edge in the next step
+	// 3 - Energy is below minimum allowed
 	private boolean shouldRecharge() {
 		return (getLastAction().equals(Actions.GOTO) && getLastActionResult().equals(ActionResults.NORESOURCE)) ||
 				(getLastAction().equals(Actions.PROBE) && getLastActionResult().equals(ActionResults.NORESOURCE)) ||
-				(getEnergy() <= THRESHOLD_ENERGY && !path.isEmpty());
+				(getEnergy() <= Thresholds.ENERGY);
 	}
 	
 	private Action planGoto() {
@@ -195,7 +205,8 @@ public class Explorer extends Agent {
 	}
 	
 	// goto if:
-	// 1 - There is a valid path to go to a target node
+	// 1 - If in Exploring mode, there is a valid path to go to a target node
+	// 2 - If in Probing mode, there is a valid path to go to a target node to probe
 	private boolean shouldGoto() {
 		return !path.isEmpty();
 	}
@@ -205,8 +216,13 @@ public class Explorer extends Agent {
 		if(path.isEmpty()) {
 			print("Updating path..");
 			
-			// new target found
-			String target = GraphManager.get(getAgentName()).getUnvisited(getPosition(), targets.values());
+			String target = null;
+			if(this.mode == AgentMode.EXPLORING) {
+				target = GraphManager.get(getAgentName()).getUnvisited(getPosition(), targets.values());
+			}
+			else if(this.mode == AgentMode.PROBING) {
+				target = GraphManager.get(getAgentName()).getProbable(getPosition(), Thresholds.PROBE);
+			}
 			
 			// path updated
 			path = GraphManager.get(getAgentName()).path(getPosition(), target);

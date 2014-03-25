@@ -53,9 +53,9 @@ public class Graph {
 	
 	// gets an unvisited closest vertex that no other agent is targetted that vertex.
 	// takes O(n) time where n is the size of vertices
-	public String getUnvisited(String position, Collection<String> otherAgentsTargets) {
+	public String getUnvisited(String vertex, Collection<String> otherAgentsTargets) {
 		
-		// register target nodes if they are not known by the 
+		// register target nodes if they are not known by the agent
 		for(String target : otherAgentsTargets) {
 			if(!isKnown(target)) {
 				register(target);
@@ -63,7 +63,7 @@ public class Graph {
 		}
 		
 		int cost = Integer.MAX_VALUE;
-		int i    = r.get(position);
+		int i    = r.get(vertex);
 		int cand = 0;
 		
 		for(int j = 0; j < cur; j++) {
@@ -72,7 +72,7 @@ public class Graph {
 				cand = j;
 			}
 		}
-		return rr.get(cand);
+		return !v[cand] ? rr.get(cand) : null;
 	}
 	
 	// removes a node from unvisited queue
@@ -93,6 +93,24 @@ public class Graph {
 	
 	public void setProbed(String vertex, Integer weight) {
 		pr.put(vertex, weight);
+	}
+	
+	public int probeValue(String vertex) {
+		return isProbed(vertex) ? pr.get(vertex) : 0;
+	}
+	
+	// returns closest vertex which has probe value more than threshold
+	public String getProbable(String vertex, int threshold) {
+		int i = r.get(vertex);
+		int cost = Integer.MAX_VALUE;
+		int cand = i;
+		for(int j = 0; j < cur; j++) {
+			if(d[i][j] < cost && probeValue(rr.get(j)) > threshold) {
+				cand = j;
+				cost = d[i][j];
+			}
+		}
+		return rr.get(cand);
 	}
 	
 	// returns true if a vertex is seen before

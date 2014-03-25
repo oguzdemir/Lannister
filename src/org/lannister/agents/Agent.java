@@ -2,6 +2,8 @@ package org.lannister.agents;
 
 import org.lannister.EIManager;
 import org.lannister.messaging.AgentsMessenger;
+import org.lannister.util.ActionResults;
+import org.lannister.util.Actions;
 
 import eis.iilang.Action;
 
@@ -10,16 +12,16 @@ author = 'Oguz Demir'
  */
 public abstract class Agent extends Thread {
 
-	private String name;
-	private int step = -1;
+	protected String name;
+	protected int step = -1;
+	protected boolean newStep = false;
 	
 	private String position;
-	private String lastAction;
-	private String lastActionResult;
+	private String lastAction       = Actions.SKIP;
+	private String lastActionResult = ActionResults.SUCCESS;
 	private int energy;
 	
-	protected int THRESHOLD_ENERGY = 10;
-	
+	protected AgentMode mode;
 	protected AgentsMessenger messenger;
 	
 	public Agent(String name) {
@@ -94,13 +96,17 @@ public abstract class Agent extends Thread {
 		boolean running = EIManager.isRunning();
 		
 		while(running) {
-			
-			Action action = perform();
-			
-			if(action != null) {
-				EIManager.act(getAgentName(), action);
+			handlePercepts();
+			handleMessages();
+			if(newStep) {
+				updateMode();
+				
+				Action action = perform();
+				
+				if(action != null) {
+					EIManager.act(getAgentName(), action);
+				}
 			}
-			
 			running = EIManager.isRunning();
 		}
 	}
@@ -111,5 +117,20 @@ public abstract class Agent extends Thread {
 	 * Plans an action according to current beliefs.
 	 * @return
 	 */
-	public abstract Action perform();
+	protected abstract Action perform();
+	
+	/**
+	 * Handles percepts that agents sensors received
+	 */
+	protected abstract void handlePercepts();
+	
+	/**
+	 * Handles messages received from other agents
+	 */
+	protected abstract void handleMessages();
+	
+	/**
+	 * Updates mode if necessary
+	 */
+	protected abstract void updateMode();
 }

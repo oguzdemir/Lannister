@@ -7,4 +7,5 @@ public class Actions {
 	public static String GOTO 		= "goto";
 	public static String RECHARGE 	= "recharge";
 	public static String PROBE		= "probe";
+	public static String SKIP       = "skip";
 }
