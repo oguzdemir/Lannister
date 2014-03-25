@@ -17,6 +17,12 @@ public class AgentsController {
 	private LinkedList<String> connections = new LinkedList<String>() {{
 		add("connectionA1");
 		add("connectionA2");
+		add("connectionA3");
+		add("connectionA4");
+		add("connectionA5");
+		add("connectionA6");
+		add("connectionA7");
+		add("connectionA8");
 	}};
 	
 	public AgentsController() {

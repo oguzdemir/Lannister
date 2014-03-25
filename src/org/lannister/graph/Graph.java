@@ -100,16 +100,21 @@ public class Graph {
 	}
 	
 	// returns closest vertex which has probe value more than threshold
-	public String getProbable(String vertex, int threshold) {
+	public String getBestProbe(String vertex) {
 		int i = r.get(vertex);
-		int cost = Integer.MAX_VALUE;
 		int cand = i;
+		int maxProbe = 0;
+		
 		for(int j = 0; j < cur; j++) {
-			if(d[i][j] < cost && probeValue(rr.get(j)) > threshold) {
+			if(probeValue(rr.get(j)) > maxProbe) {
 				cand = j;
-				cost = d[i][j];
+				maxProbe = probeValue(rr.get(j));
+			} 
+			else if(probeValue(rr.get(j)) == maxProbe && d[i][j] < d[i][cand]) {
+				cand = j;
 			}
 		}
+		
 		return rr.get(cand);
 	}
 	

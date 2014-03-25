@@ -221,7 +221,7 @@ public class Explorer extends Agent {
 				target = GraphManager.get(getAgentName()).getUnvisited(getPosition(), targets.values());
 			}
 			else if(this.mode == AgentMode.PROBING) {
-				target = GraphManager.get(getAgentName()).getProbable(getPosition(), Thresholds.PROBE);
+				target = GraphManager.get(getAgentName()).getBestProbe(getPosition());
 			}
 			
 			// path updated
