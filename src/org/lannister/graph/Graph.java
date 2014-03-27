@@ -1,11 +1,14 @@
 package org.lannister.graph;
 
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeSet;
 
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 public class Graph {
@@ -21,8 +24,8 @@ public class Graph {
 	
 	private int[][]   g = new int[400][400]; // all zero initially
 	private int[][]   d = new int[400][400]; // all zero initially
-	private int[][]   p = new int[400][400];
-	private boolean[] v = new boolean[400];
+	private int[][]   p = new int[400][400]; // predecessor info for path finding
+	private boolean[] v = new boolean[400];  // visited info for vertices
 	private int       cur;
 	private int 	  visited;
 	
@@ -123,23 +126,46 @@ public class Graph {
 		return isProbed(vertex) ? pr.get(vertex) : 0;
 	}
 	
-	// returns best closest vertex to probe
-	public String getBestProbe(String vertex) {
-		int i = r.get(vertex);
-		int cand = i;
-		int maxProbe = 0;
+	private int probeValue(int i) {
+		return probeValue(rr.get(i));
+	}
+	
+	public List<String> findBaseNodes(int size) {
 		
-		for(int j = 0; j < cur; j++) {
-			if(probeValue(rr.get(j)) > maxProbe) {
-				cand = j;
-				maxProbe = probeValue(rr.get(j));
-			} 
-			else if(probeValue(rr.get(j)) == maxProbe && d[i][j] < d[i][cand]) {
-				cand = j;
+		// find best vertex to probe
+		int m = 0;
+		int b = -1;
+		for(int i = 0; i < cur; i++) {
+			int score = probeValue(i);
+			for(int j = 0; j < cur; j++) if(d[i][j] == 1) score += probeValue(j);
+			for(int j = 0; j < cur; j++) if(d[i][j] == 2) score += probeValue(j);
+			
+			if(score > m) {
+				m = score;
+				b = i;
 			}
 		}
 		
-		return rr.get(cand);
+		// find all points in 2-degree away from the best point
+		TreeSet<String> set = new TreeSet<String>(new Comparator<String>() {
+
+			@Override
+			public int compare(String o1, String o2) {
+				return pr.get(o1) < pr.get(o2) ? 1 : -1;
+			}
+		});
+		
+		set.add(rr.get(b));
+		for(int i = 0; i < cur; i++) {
+			if(d[b][i] == 2) {
+				set.add(rr.get(i));
+			}
+		}
+		
+		// get only sized points
+		Iterable<String> limited = Iterables.limit(set, size);
+		
+		return Lists.newLinkedList(limited);
 	}
 	
 	// returns true if a vertex is seen before

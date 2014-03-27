@@ -1,15 +1,15 @@
 package org.lannister.agents;
 
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import org.lannister.EIManager;
 import org.lannister.graph.GraphManager;
 import org.lannister.messaging.Message;
+import org.lannister.messaging.Messages;
 import org.lannister.util.ActionResults;
 import org.lannister.util.Actions;
+import org.lannister.util.Percepts;
 import org.lannister.util.Thresholds;
 
 import eis.iilang.Action;
@@ -27,6 +27,9 @@ public class Explorer extends Agent {
 	// next node to visit in order to reach target node
 	private String next;
 	
+	// base position of the explorer agent to stay on during simulation
+	private String base;
+	
 	public Explorer(String name) {
 		super(name);
 		this.mode = AgentMode.EXPLORING;
@@ -37,7 +40,7 @@ public class Explorer extends Agent {
 		List<Percept> percepts = EIManager.getPercepts(getAgentName());
 		
 		for(Percept percept : percepts) {
-			if(percept.getName().equals("step")) {
+			if(percept.getName().equals(Percepts.STEP)) {
 				int step = Integer.valueOf(percept.getParameters().getFirst().toString());
 				if(getCurrentStep() < step) {
 					newStep = true;
@@ -47,34 +50,34 @@ public class Explorer extends Agent {
 					newStep = false;
 				}
 			}
-			else if(percept.getName().equals("position")) {
+			else if(percept.getName().equals(Percepts.POSITION)) {
 				String pos = percept.getParameters().getFirst().toString();
 				setPosition(pos);
 				GraphManager.get(getAgentName()).setVisited(pos);
-				coordinator.broadcast(new Message(getAgentName(), percept));
+				coordinator.broadcast(Messages.create(getAgentName(), percept));
 			}
-			else if(percept.getName().equals("visibleVertex")) {
+			else if(percept.getName().equals(Percepts.VISIBLEVERTEX)) {
 				GraphManager.get(getAgentName()).addVertex(percept.getParameters().getFirst().toString());
-				coordinator.broadcast(new Message(getAgentName(), percept));
+				coordinator.broadcast(Messages.create(getAgentName(), percept));
 			}
-			else if(percept.getName().equals("visibleEdge")) {
+			else if(percept.getName().equals(Percepts.VISIBLEEDGE)) {
 				GraphManager.get(getAgentName()).addEdge(percept.getParameters().getFirst().toString(),
 										   percept.getParameters().getLast().toString(), 1);
-				coordinator.broadcast(new Message(getAgentName(), percept));
+				coordinator.broadcast(Messages.create(getAgentName(), percept));
 			}
-			else if(percept.getName().equals("energy")) {
+			else if(percept.getName().equals(Percepts.ENERGY)) {
 				setEnergy(Integer.valueOf(percept.getParameters().getFirst().toString()));
 			}
-			else if(percept.getName().equals("lastAction")) {
+			else if(percept.getName().equals(Percepts.LASTACTION)) {
 				setLastAction(percept.getParameters().getFirst().toString());
 			}
-			else if(percept.getName().equals("lastActionResult")) {
+			else if(percept.getName().equals(Percepts.LASTACTIONRESULT)) {
 				setLastActionResult(percept.getParameters().getFirst().toString());
 			}
-			else if(percept.getName().equals("probedVertex")) {
+			else if(percept.getName().equals(Percepts.PROBEDVERTEX)) {
 				GraphManager.get(getAgentName()).setProbed(percept.getParameters().getFirst().toString(),
 														Integer.valueOf(percept.getParameters().getLast().toString()));
-				coordinator.broadcast(new Message(getAgentName(), percept));
+				coordinator.broadcast(Messages.create(getAgentName(), percept));
 			}
 		}
 	}
@@ -87,19 +90,22 @@ public class Explorer extends Agent {
 			String fromAgent = message.getFrom();
 			Percept percept  = message.getPercept();
 			
-			if(percept.getName().equals("visibleVertex")) {
+			if(percept.getName().equals(Percepts.VISIBLEVERTEX)) {
 				GraphManager.get(getAgentName()).addVertex(percept.getParameters().get(0).toString());
 			} 
-			else if(percept.getName().equals("visibleEdge")) {
+			else if(percept.getName().equals(Percepts.VISIBLEEDGE)) {
 				GraphManager.get(getAgentName()).addEdge(percept.getParameters().getFirst().toString(),
 						   percept.getParameters().getLast().toString(), 1);
 			}
-			else if(percept.getName().equals("position")) {
+			else if(percept.getName().equals(Percepts.POSITION)) {
 				GraphManager.get(getAgentName()).setVisited(percept.getParameters().get(0).toString());
 			}
-			else if(percept.getName().equals("probedVertex")) {
+			else if(percept.getName().equals(Percepts.PROBEDVERTEX)) {
 				GraphManager.get(getAgentName()).setProbed(percept.getParameters().getFirst().toString(),
 						Integer.valueOf(percept.getParameters().getLast().toString()));
+			}
+			else if(percept.getName().equals(Percepts.BASE)) {
+				this.base = percept.getParameters().getFirst().toString();
 			}
 		}
 	}
@@ -110,9 +116,6 @@ public class Explorer extends Agent {
 		
 		// update distance matrix
 		GraphManager.get(getAgentName()).aps();
-		
-		print("Total perceived vertex size: " + GraphManager.get(getAgentName()).size());
-		print("Total visited vertex size: " + GraphManager.get(getAgentName()).visited());
 		
 		// we are assuming that a previous goto action should succeed, 
 		// but if somehow we hit an error in goto step, we need to repair the path
@@ -139,7 +142,7 @@ public class Explorer extends Agent {
 		}
 		
 		print("Skip..");
-		return new Action("skip");
+		return new Action(Actions.SKIP);
 	}
 	
 	@Override
@@ -149,11 +152,14 @@ public class Explorer extends Agent {
 			this.mode = AgentMode.DEFENSIVE;
 		}
 		// update mode to probing if there are no more unvisited nodes
-		else if(this.mode == AgentMode.EXPLORING && GraphManager.get(getAgentName()).getUnvisited(getPosition(), coordinator.getTargets()) == null) {
+		else if(this.mode == AgentMode.EXPLORING && path.isEmpty() && GraphManager.get(getAgentName()).getUnvisited(getPosition(), coordinator.getTargets()) == null) {
 			this.mode = AgentMode.PROBING;
 		}
-		else if(this.mode == AgentMode.PROBING && GraphManager.get(getAgentName()).getUnprobed(getPosition(), coordinator.getTargets()) == null) {
+		// update mode to bestscore if there are no more unprobed nodes
+		// signal coordinator to find the base for team 
+		else if(this.mode == AgentMode.PROBING && path.isEmpty() && GraphManager.get(getAgentName()).getUnprobed(getPosition(), coordinator.getTargets()) == null) {
 			this.mode = AgentMode.BESTSCORE;
+			coordinator.findBase();
 		}
  	}
 	
@@ -166,11 +172,9 @@ public class Explorer extends Agent {
 	
 	// probe if:
 	// 1 - agent is on the target node which is not probed
-	// 2 - agent is in BESTSCORE mode and the current node is the best node to probe
 	private boolean shouldProbe() {
 		return (this.mode == AgentMode.EXPLORING && path.isEmpty() && !GraphManager.get(getAgentName()).isProbed(getPosition()))
-				|| (this.mode == AgentMode.PROBING && path.isEmpty() && !GraphManager.get(getAgentName()).isProbed(getPosition()))
-				|| (this.mode == AgentMode.BESTSCORE && getPosition().equals(GraphManager.get(getAgentName()).getBestProbe(getPosition())));
+				|| (this.mode == AgentMode.PROBING && path.isEmpty() && !GraphManager.get(getAgentName()).isProbed(getPosition()));
 				
 	}
 	
@@ -197,7 +201,7 @@ public class Explorer extends Agent {
 		
 		if(shouldGoto()) {
 			next = path.remove(0);
-			return new Action("goto", new Identifier(next));
+			return new Action(Actions.GOTO, new Identifier(next));
 		}
 		
 		return null;
@@ -213,7 +217,6 @@ public class Explorer extends Agent {
 	//keep path always updated
 	private void updatePath() {
 		if(path.isEmpty()) {
-			print("Updating path..");
 
 			String target = null;
 			if(this.mode == AgentMode.EXPLORING) {
@@ -223,24 +226,27 @@ public class Explorer extends Agent {
 				target = GraphManager.get(getAgentName()).getUnprobed(getPosition(), coordinator.getTargets());
 			}
 			else if(this.mode == AgentMode.BESTSCORE) {
-				target = GraphManager.get(getAgentName()).getBestProbe(getPosition());
+				target = base;
 			}
 			
-			// path updated
-			path = GraphManager.get(getAgentName()).path(getPosition(), target);
-			
-			// register target to coordinator
-			boolean ret = coordinator.registerTarget(getAgentName(), target);
-			
-			// check for target collision
-			if(this.mode == AgentMode.EXPLORING || this.mode == AgentMode.PROBING) {
-				if(ret == false) {
-					print("Target is collided with another agent..");
-					updatePath();
+			if(target != null && !target.equals(getPosition())) {
+				print("Updating path..");
+				// path updated
+				path = GraphManager.get(getAgentName()).path(getPosition(), target);
+				
+				// register target to coordinator
+				boolean ret = coordinator.registerTarget(getAgentName(), target);
+				
+				// check for target collision, no two agent aims the same node
+				if(this.mode == AgentMode.EXPLORING || this.mode == AgentMode.PROBING) {
+					if(ret == false) {
+						print("Target is collided with another agent..");
+						updatePath();
+					}
 				}
+				
+				print(path);
 			}
-			
-			print(path);
 		}
 	}
 	
