@@ -22,12 +22,16 @@ public class Graph {
 	// probed information of nodes
 	private Map<String, Integer> pr = new HashMap<String, Integer>();
 	
-	private int[][]   g = new int[400][400]; // all zero initially
-	private int[][]   d = new int[400][400]; // all zero initially
+	private int[][]   g = new int[400][400]; // g[i][j] = 1 if there is an edge, else zero
+	private int[][]   d = new int[400][400]; // d[i][j] represents the shortest edge distance 
 	private int[][]   p = new int[400][400]; // predecessor info for path finding
+	private int[][]   w = new int[400][400]; // w[i][j] represents edge cost between i and j if they are neighbors, else zero
 	private boolean[] v = new boolean[400];  // visited info for vertices
-	private int       cur;
-	private int 	  visited;
+	private boolean[] s = new boolean[400];  // surveyed info for vertices
+	private int       cur 		= 0;
+	private int 	  visited 	= 0;
+	private int 	  probed	= 0;
+	private int 	  surveyed  = 0;
 	
 	// register a new vertex
 	private void register(String v) {
@@ -57,18 +61,18 @@ public class Graph {
 	// gets an unvisited closest vertex that no other agent is targetted that vertex.
 	// takes O(n) time where n is the size of vertices
 	public String getUnvisited(String vertex, Collection<String> otherAgentsTargets) {
-		
+
 		// register target nodes if they are not known by the agent
 		for(String target : otherAgentsTargets) {
 			if(!isKnown(target)) {
 				register(target);
 			}
 		}
-		
+
 		int cost = Integer.MAX_VALUE;
 		int i    = r.get(vertex);
 		int cand = 0;
-		
+
 		for(int j = 0; j < cur; j++) {
 			if(!v[j] && cost > d[i][j] && !otherAgentsTargets.contains(rr.get(j))) {
 				cost = d[i][j];
@@ -87,19 +91,42 @@ public class Graph {
 				register(target);
 			}
 		}
-		
+
 		int cost = Integer.MAX_VALUE;
 		int i    = r.get(vertex);
 		int cand = 0;
-		
+
 		for(int j = 0; j < cur; j++) {
 			String v = rr.get(j);
-			if(!pr.containsKey(v) && cost > d[i][j] && !otherAgentsTargets.contains(rr.get(j))) {
+			if(!pr.containsKey(v) && cost > d[i][j] && !otherAgentsTargets.contains(v)) {
 				cost = d[i][j];
 				cand = j;
 			}
 		}
 		return !pr.containsKey(rr.get(cand)) ? rr.get(cand) : null;
+	}
+	
+	// gets an unsurveyed closest vertex that no other agent is targetted that vertex.
+	public String getUnsurveyed(String vertex, Collection<String> otherAgentsTargets) {
+		// register target nodes if they are not known by the agent
+		for(String target : otherAgentsTargets) {
+			if(!isKnown(target)) {
+				register(target);
+			}
+		}
+		
+		int cost = Integer.MAX_VALUE;
+		int i	 = r.get(vertex);
+		int cand = 0;
+		
+		for(int j = 0; j < cur; j++) {
+			if(!s[j] && cost > d[i][j] && !otherAgentsTargets.contains(rr.get(j))) {
+				cost = d[i][j];
+				cand = j;
+			}
+		}
+		
+		return !s[cand] ? rr.get(cand) : null;
 	}
 	
 	// removes a node from unvisited queue
@@ -110,8 +137,24 @@ public class Graph {
 		}
 		
 		int i = r.get(vertex);
-		if(!v[i]) visited++;
+		if(!v[i]) { visited++; }
 		v[i] = true;
+	}
+	
+	public void setSurveyed(String vertex) {
+		int i = r.get(vertex);
+		if(!s[i]) { surveyed++; }
+		s[i] = true;
+	}
+	
+	public void setSurveyedEdge(String vertex1, String vertex2, Integer value) {
+		if(!isKnown(vertex1)) register(vertex1);
+		if(!isKnown(vertex2)) register(vertex2);
+		
+		int i = r.get(vertex1);
+		int j = r.get(vertex2);
+		
+		w[i][j] = w[j][i] = Math.max(w[i][j], value);
 	}
 	
 	public boolean isProbed(String vertex) {
@@ -119,6 +162,7 @@ public class Graph {
 	}
 	
 	public void setProbed(String vertex, Integer weight) {
+		if(!pr.containsKey(vertex)) probed++;
 		pr.put(vertex, weight);
 	}
 	
@@ -130,7 +174,7 @@ public class Graph {
 		return probeValue(rr.get(i));
 	}
 	
-	public List<String> findBaseNodes(int size) {
+	public LinkedList<String> findBaseNodes(int size) {
 		
 		// find best vertex to probe
 		int m = 0;
@@ -169,7 +213,7 @@ public class Graph {
 	}
 	
 	// returns true if a vertex is seen before
-	public boolean isKnown(String vertex) {
+	private boolean isKnown(String vertex) {
 		return r.containsKey(vertex);
 	}
 	
@@ -208,11 +252,27 @@ public class Graph {
 		return new LinkedList<String>(Lists.reverse(path));
 	}
 	
-	public int visited() {
-		return visited;
+	/**
+	 * Weight between two adjacent points
+	 * @param s1
+	 * @param s2
+	 * @return
+	 */
+	public int weightCost(String s1, String s2) {
+		int i = r.get(s1);
+		int j = r.get(s2);
+		return w[i][j];
 	}
 	
-	public int size() {
-		return cur;
+	/**
+	 * Edge cost between two points
+	 * @param s1
+	 * @param s2
+	 * @return
+	 */
+	public int edgeCost(String s1, String s2) {
+		int i = r.get(s1);
+		int j = r.get(s2);
+		return d[i][j];
 	}
 }

@@ -14,8 +14,8 @@ author = 'Oguz Demir'
 public class Messages {
 	
 	public static Message create(String from, String action, String... params) {
-		List<String> paramList 		= Arrays.asList(params);
-		List<Parameter> parameters  = Lists.transform(paramList, new MessageTransformer());
+		params = params == null ? new String[] {} : params;
+		List<Parameter> parameters  = Lists.transform(Arrays.asList(params), new MessageTransformer());
 		
 		return new Message(from, new Percept(action, Lists.newLinkedList(parameters)));
 	}

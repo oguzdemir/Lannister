@@ -35,7 +35,7 @@ public class AgentUtil {
 	 * @param clazz
 	 * @return
 	 */
-	public static List<Agent> getOnly(Iterable<Agent> agents, Class clazz) {
+	public static List<? extends Agent> getOnly(Iterable<Agent> agents, Class<? extends Agent> clazz) {
 		return Lists.newLinkedList(Iterables.filter(agents, clazz));
 	}
 }

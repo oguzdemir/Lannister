@@ -1,31 +1,134 @@
 package org.lannister.agents;
 
-import org.lannister.EIManager;
+import java.util.List;
+
+import org.lannister.brain.AgentBrain;
+import org.lannister.graph.GraphManager;
 import org.lannister.messaging.AgentsCoordinator;
-import org.lannister.util.ActionResults;
-import org.lannister.util.Actions;
+import org.lannister.messaging.Message;
+import org.lannister.messaging.Messages;
+import org.lannister.util.Percepts;
 
 import eis.iilang.Action;
+import eis.iilang.Percept;
 
 /**
 author = 'Oguz Demir'
  */
-public abstract class Agent extends Thread {
+public abstract class Agent {
 
 	protected String name;
 	protected int step = -1;
 	protected boolean newStep = false;
+
+	protected AgentBrain brain;
 	
-	private String position;
-	private String lastAction       = Actions.SKIP;
-	private String lastActionResult = ActionResults.SUCCESS;
-	private int energy;
+	public Agent(String name, AgentBrain brain) {
+		this.name 	= name;
+		this.brain 	= brain;
+	}
+
+	protected void printInfo() {
+		print("Step: " + step);
+		print("Position: " + brain.getPosition());
+		print("Mode: " + brain.getMode());
+		print("Energy: " + brain.getEnergy());
+		print("Last action: " + brain.getAction());
+		print("Last action param: " + brain.getParam());
+		print("Last Action result: " + brain.getResult());
+	}
 	
-	protected AgentMode mode;
-	protected AgentsCoordinator coordinator;
+	protected void print(Object o) {
+		System.out.println("[Agent - " + getAgentName() + "]: " + o);
+	}
 	
-	public Agent(String name) {
-		this.name = name;
+	/**
+	 * Performs an action if in a new step
+	 * @return
+	 */
+	public Action perform() {
+		handlePercepts();
+		handleMessages();
+		
+		if(newStep) {
+			//GraphManager.requestUpdate();
+			GraphManager.get().aps();
+			printInfo();
+			return brain.perform();
+		}
+		return null;
+	}
+	
+	/**
+	 * Handles percepts that agents sensors received,
+	 * Returns true if it is a new step.
+	 */
+	protected abstract void handlePercepts();
+	
+	/**
+	 * Handles messages received from other agents
+	 */
+	protected abstract void handleMessages();
+	
+	public boolean handleCommonPercepts(List<Percept> percepts) {
+		for(Percept percept : percepts) {
+			if(percept.getName().equals(Percepts.STEP)) {
+				int step = Integer.valueOf(percept.getParameters().getFirst().toString());
+				if(getCurrentStep() < step) {
+					newStep = true;
+					setCurrentStep(step);
+				}
+				else {
+					newStep = false;
+				}
+			}
+			else if(percept.getName().equals(Percepts.POSITION)) {
+				String pos = percept.getParameters().getFirst().toString();
+				brain.setPosition(pos);
+				GraphManager.get().setVisited(pos);
+				brain.getCoordinator().broadcast(Messages.create(getAgentName(), percept));
+			}
+			else if(percept.getName().equals(Percepts.VISIBLEVERTEX)) {
+				GraphManager.get().addVertex(percept.getParameters().getFirst().toString());
+			}
+			else if(percept.getName().equals(Percepts.VISIBLEEDGE)) {
+				GraphManager.get().addEdge(percept.getParameters().getFirst().toString(),
+										   percept.getParameters().getLast().toString(), 1);
+			}
+			else if(percept.getName().equals(Percepts.SURVEYEDEDGE)) {
+				String vertex1 = percept.getParameters().get(0).toString();
+				String vertex2 = percept.getParameters().get(1).toString();
+				Integer weight = Integer.valueOf(percept.getParameters().get(2).toString());
+				GraphManager.get().setSurveyedEdge(vertex1, vertex2, weight);
+			}
+			else if(percept.getName().equals(Percepts.ENERGY)) {
+				brain.setEnergy(Integer.valueOf(percept.getParameters().getFirst().toString()));
+			}
+			else if(percept.getName().equals(Percepts.HEALTH)) {
+				brain.setHealth(Integer.valueOf(percept.getParameters().getFirst().toString()));
+			}
+			else if(percept.getName().equals(Percepts.LASTACTION)) {
+				brain.setAction(percept.getParameters().getFirst().toString());
+			}
+			else if(percept.getName().equals(Percepts.LASTACTIONPARAM)) {
+				brain.setParam(percept.getParameters().getFirst().toString());
+			}
+			else if(percept.getName().equals(Percepts.LASTACTIONRESULT)) {
+				brain.setResult(percept.getParameters().getFirst().toString());
+			}
+		}
+		return newStep;
+	}
+	
+	public void handleCommonMessages(List<Message> messages) {
+		for(Message message : messages) {
+			String from 	= message.getFrom();
+			Percept percept = message.getPercept();
+			
+			if(percept.getName().equals(Percepts.POSITION)) {
+				brain.getPositions().put(from, percept.getParameters().getFirst().toString());
+			}
+		}
 	}
 	
 	public String getAgentName() {
@@ -39,98 +142,8 @@ public abstract class Agent extends Thread {
 	protected void setCurrentStep(int step) {
 		this.step = step;
 	}
-	
-	protected String getPosition() {
-		return position;
-	}
-	
-	protected void setPosition(String position) {
-		this.position = position;
-	}
-	
-	public int getEnergy() {
-		return energy;
-	}
-
-	public void setEnergy(int energy) {
-		this.energy = energy;
-	}
-
-	public String getLastAction() {
-		return lastAction;
-	}
-
-	public void setLastAction(String lastAction) {
-		this.lastAction = lastAction;
-	}
-
-	public String getLastActionResult() {
-		return lastActionResult;
-	}
-
-	public void setLastActionResult(String lastActionResult) {
-		this.lastActionResult = lastActionResult;
-	}
-
-	public AgentsCoordinator getCoordinator() {
-		return coordinator;
-	}
 
 	public void setCoordinator(AgentsCoordinator coordinator) {
-		this.coordinator = coordinator;
+		this.brain.setCoordinator(coordinator);
 	}
-
-	protected void info() {
-		print("Step: " + step);
-		print("Position: " + position);
-		print("Energy: " + energy);
-		print("Last action: " + lastAction);
-		print("Last Action Result: " + lastActionResult);
-	}
-	
-	protected void print(Object o) {
-		System.out.println("[Agent - " + getAgentName() + "]: " + o);
-	}
-	
-	public void run() {
-		boolean running = EIManager.isRunning();
-		
-		while(running) {
-			handlePercepts();
-			handleMessages();
-			if(newStep) {
-				updateMode();
-				
-				Action action = perform();
-				
-				if(action != null) {
-					EIManager.act(getAgentName(), action);
-				}
-			}
-			running = EIManager.isRunning();
-		}
-	}
-	
-	
-	
-	/**
-	 * Plans an action according to current beliefs.
-	 * @return
-	 */
-	protected abstract Action perform();
-	
-	/**
-	 * Handles percepts that agents sensors received
-	 */
-	protected abstract void handlePercepts();
-	
-	/**
-	 * Handles messages received from other agents
-	 */
-	protected abstract void handleMessages();
-	
-	/**
-	 * Updates mode if necessary
-	 */
-	protected abstract void updateMode();
 }

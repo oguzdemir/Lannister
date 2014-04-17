@@ -1,36 +1,47 @@
 package org.lannister.graph;
 
-import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
 
 public class GraphManager {
-
-	private static Map<String, Graph> graphs = new HashMap<String, Graph>();
 	
-	private static List<String> baseNodes = new LinkedList<String>();
+	private static int requestCounts = 0;
+	private static int TEAMSIZE		 = 12;
 	
-	public static synchronized Graph get(String agentName) {
-		if(graphs.get(agentName) == null) {
-			graphs.put(agentName, new Graph());
-		}
-		
-		return graphs.get(agentName);
+	private static Graph graph;
+	
+	private static LinkedList<String> baseNodes = new LinkedList<String>();
+	
+	public static Graph get() {
+		return graph == null ? graph = new Graph() : graph;
 	}
 	
-	public static synchronized List<String> getBaseNodes(int size) {
+	private static LinkedList<String> getBaseNodes(int size) {
 		if(!baseNodes.isEmpty()) {
 			return baseNodes;
 		}
 		
-		// get any graph
-		Graph g = graphs.values().iterator().next();
-		
 		// update base nodes
-		baseNodes = g.findBaseNodes(size);
-		
-		// return
+		baseNodes = graph.findBaseNodes(size);
+		System.out.println("BASE NODES ARE FOUND: " + baseNodes);
 		return baseNodes;
 	}
+	
+	public static String grabBaseNode() {
+		baseNodes = baseNodes.isEmpty() ? getBaseNodes(TEAMSIZE) : baseNodes;
+		return baseNodes.removeFirst();
+	}
+	
+	public static void requestUpdate() {
+		++requestCounts;
+		System.out.println("Request received: " + requestCounts);
+		if(requestCounts == TEAMSIZE) {
+			// everybody requested, run APS algorithm
+			graph.aps();
+			
+			// reset
+			requestCounts = 0;
+		}
+	}
 }
+
+

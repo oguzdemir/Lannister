@@ -12,5 +12,11 @@ public class Percepts {
 	public static String ENERGY 			= "energy";
 	public static String LASTACTION 		= "lastAction";
 	public static String LASTACTIONRESULT 	= "lastActionResult";
+	public static String LASTACTIONPARAM	= "lastActionParam";
 	public static String PROBEDVERTEX 		= "probedVertex";
+	public static String SURVEYEDEDGE		= "surveyedEdge";
+	public static String HEALTH				= "health";
+	
+	// custom percepts
+	public static String HELP				= "help";
 }
