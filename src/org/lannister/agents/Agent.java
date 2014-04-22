@@ -108,6 +108,7 @@ public abstract class Agent {
 			else if(percept.getName().equals(Percepts.HEALTH)) {
 				brain.setHealth(Integer.valueOf(percept.getParameters().getFirst().toString()));
 				brain.setDisabled(brain.getHealth() == 0);
+				brain.getCoordinator().broadcast(Messages.create(getAgentName(), percept));
 			}
 			else if(percept.getName().equals(Percepts.LASTACTION)) {
 				brain.setAction(percept.getParameters().getFirst().toString());
@@ -117,6 +118,10 @@ public abstract class Agent {
 			}
 			else if(percept.getName().equals(Percepts.LASTACTIONRESULT)) {
 				brain.setResult(percept.getParameters().getFirst().toString());
+			}
+			else if(percept.getName().equals(Percepts.ROLE)) {
+				brain.setRole(percept.getParameters().getFirst().toString());
+				brain.getCoordinator().broadcast(Messages.create(getAgentName(), percept));
 			}
 		}
 		return newStep;
@@ -130,6 +135,22 @@ public abstract class Agent {
 			if(percept.getName().equals(Percepts.POSITION)) {
 				brain.getPositions().put(from, percept.getParameters().getFirst().toString());
 			}
+			else if(percept.getName().equals(Percepts.HEALTH)) {
+				brain.getHealths().put(from, Integer.valueOf(percept.getParameters().getFirst().toString()));
+			}
+			else if(percept.getName().equals(Percepts.ROLE)) {
+				brain.getRoles().put(from, percept.getParameters().getFirst().toString());
+			}
+			else if(percept.getName().equals(Percepts.INSPECTEDENTITY)) {
+				String id = percept.getParameters().get(0).toString();
+				String team = percept.getParameters().get(1).toString();
+				String role = percept.getParameters().get(2).toString();
+				String pos  = percept.getParameters().get(3).toString();
+				
+				brain.getPositions().put(id, pos);
+				brain.getRoles().put(id, role);
+			}
+			
 		}
 	}
 	

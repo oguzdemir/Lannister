@@ -4,18 +4,37 @@ import org.lannister.action.ActionFactory;
 import org.lannister.action.ActionResults;
 import org.lannister.action.Actions;
 import org.lannister.agents.AgentMode;
+import org.lannister.brain.AgentPlan.PlanType;
 
 import eis.iilang.Action;
 
 /**
 author = 'Oguz Demir'
  */
-public class SaboteurBrain extends AgentBrain {
+public class InspectorBrain extends AgentBrain {
 
-	private String target = null;
+	private String enemy;
 	
-	public SaboteurBrain(String name) {
+	public InspectorBrain(String name) {
 		super(name);
+	}
+
+	@Override
+	protected Action handleDisabledAction() {
+		Action action = null;
+		plan 	= plan.type != PlanType.BESTSCORE ? AgentPlanner.newBestScoringPlan(position, name) : plan;
+		action 	= plan.isCompleted() ? ActionFactory.get().create(Actions.SKIP) : ActionFactory.get().gotoOrRecharge(energy, position, plan.next());
+		plan 	= plan.isCompleted() ? AgentPlanner.newBestScoringPlan(position, name) : plan;
+		return action;
+	}
+
+	@Override
+	protected Action handleImmediateAction() {
+		if(enemy != null) {
+			String eenemy = enemy; enemy = null;
+			return ActionFactory.get().inspectOrRecharge(energy, eenemy);
+		}
+		return null;
 	}
 
 	@Override
@@ -30,7 +49,7 @@ public class SaboteurBrain extends AgentBrain {
 			case ActionResults.FAILNORESOURCE: 	// recharge
 				return ActionFactory.get().create(Actions.RECHARGE);
 			case ActionResults.FAILATTACKED:   	// defend
-				return ActionFactory.get().create(Actions.PARRY);
+				return ActionFactory.get().create(Actions.SKIP);
 			case ActionResults.FAILSTATUS: 		// disabled
 				return ActionFactory.get().create(Actions.SKIP);
 			default: 
@@ -59,42 +78,14 @@ public class SaboteurBrain extends AgentBrain {
 				}
 				break;
 			case BESTSCORE:
-				action = plan.isCompleted() ? ActionFactory.get().parryOrRecharge(energy) : ActionFactory.get().gotoOrRecharge(energy, position, plan.next());
+				action = plan.isCompleted() ? ActionFactory.get().create(Actions.SKIP) : ActionFactory.get().gotoOrRecharge(energy, position, plan.next());
 				break;
-			default:
-				action = null;
-		}
-		
-		return action;
-	}
-
-	@Override
-	protected Action handleImmediateAction() {
-		Action action = null;
-		if(target != null && !disabled) {
-			action = ActionFactory.get().attackOrRecharge(energy, target);
-			target = null;
 		}
 		return action;
 	}
+	
+	public void setEnemy(String enemy) {
+		this.enemy = enemy;
+	}
 
-	@Override
-	protected Action handleDisabledAction() {
-		
-		switch(mode) {
-			case BESTSCORE:
-				System.out.println("I am disabled, let me find way to BS plan.");
-				plan = AgentPlanner.newBestScoringPlan(position, name);
-				break;
-			default:
-				plan = AgentPlanner.emptyPlan();
-				break;
-		}
-		return plan.isCompleted() ? ActionFactory.get().create(Actions.SKIP) : ActionFactory.get().gotoOrRecharge(energy, position, plan.next());
-	}
-	
-	public void setTarget(String target) {
-		this.target = target;
-	}
-	
 }

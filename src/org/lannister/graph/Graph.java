@@ -129,6 +129,24 @@ public class Graph {
 		return !s[cand] ? rr.get(cand) : null;
 	}
 	
+	public String getClosest(String vertex, Collection<String> otherVertices) {
+		// register target nodes if they are not known by the agent
+		for(String target : otherVertices) {
+			if(!isKnown(target)) {
+				register(target);
+			}
+		}
+		int i 	 = r.get(vertex);
+		int cand = 0;
+		int cost = Integer.MAX_VALUE;
+		for(String otherVertex : otherVertices) {
+			int j = r.get(otherVertex);
+			cand = d[i][j] < cost ? j 		: cand;
+			cost = d[i][j] < cost ? d[i][j] : cost;
+		}
+		return rr.get(cand);
+	}
+	
 	// removes a node from unvisited queue
 	public void setVisited(String vertex) {
 		// register if not known

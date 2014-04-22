@@ -7,16 +7,32 @@
     <agent name="LannisterExplorer4" entity="connectionA4"  class="org.lannister.agents.Explorer" team="A"/>
     <agent name="LannisterExplorer5" entity="connectionA5"  class="org.lannister.agents.Explorer" team="A"/>
     <agent name="LannisterExplorer6" entity="connectionA6"  class="org.lannister.agents.Explorer" team="A"/>
+    
     <agent name="LannisterRepairer1" entity="connectionA7"  class="org.lannister.agents.Repairer" team="A"/>
     <agent name="LannisterRepairer2" entity="connectionA8"  class="org.lannister.agents.Repairer" team="A"/>
     <agent name="LannisterRepairer3" entity="connectionA9"  class="org.lannister.agents.Repairer" team="A"/>
     <agent name="LannisterRepairer4" entity="connectionA10" class="org.lannister.agents.Repairer" team="A"/>
     <agent name="LannisterRepairer5" entity="connectionA11" class="org.lannister.agents.Repairer" team="A"/>
     <agent name="LannisterRepairer6" entity="connectionA12" class="org.lannister.agents.Repairer" team="A"/>
+    
     <agent name="LannisterSaboteur1" entity="connectionA13" class="org.lannister.agents.Saboteur" team="A"/>
     <agent name="LannisterSaboteur2" entity="connectionA14" class="org.lannister.agents.Saboteur" team="A"/>
     <agent name="LannisterSaboteur3" entity="connectionA15" class="org.lannister.agents.Saboteur" team="A"/>
     <agent name="LannisterSaboteur4" entity="connectionA16" class="org.lannister.agents.Saboteur" team="A"/>
+    
+    <agent name="LannisterSentinel1" entity="connectionA17" class="org.lannister.agents.Sentinel" team="A"/>
+    <agent name="LannisterSentinel2" entity="connectionA18" class="org.lannister.agents.Sentinel" team="A"/>
+    <agent name="LannisterSentinel3" entity="connectionA19" class="org.lannister.agents.Sentinel" team="A"/>
+    <agent name="LannisterSentinel4" entity="connectionA20" class="org.lannister.agents.Sentinel" team="A"/>
+    <agent name="LannisterSentinel5" entity="connectionA21" class="org.lannister.agents.Sentinel" team="A"/>
+    <agent name="LannisterSentinel6" entity="connectionA22" class="org.lannister.agents.Sentinel" team="A"/>
+    
+    <agent name="LannisterInspector1" entity="connectionA23" class="org.lannister.agents.Inspector" team="A"/>
+    <agent name="LannisterInspector2" entity="connectionA24" class="org.lannister.agents.Inspector" team="A"/>
+    <agent name="LannisterInspector3" entity="connectionA25" class="org.lannister.agents.Inspector" team="A"/>
+    <agent name="LannisterInspector4" entity="connectionA26" class="org.lannister.agents.Inspector" team="A"/>
+    <agent name="LannisterInspector5" entity="connectionA27" class="org.lannister.agents.Inspector" team="A"/>
+    <agent name="LannisterInspector6" entity="connectionA28" class="org.lannister.agents.Inspector" team="A"/>
     
 <!--     <agent name="StarkExplorer1" entity="connectionB1"  class="org.lannister.agents.Explorer" team="B"/> -->
 <!--     <agent name="StarkExplorer2" entity="connectionB2"  class="org.lannister.agents.Explorer" team="B"/> -->

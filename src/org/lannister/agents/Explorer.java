@@ -29,6 +29,7 @@ public class Explorer extends Agent {
 				GraphManager.get().setProbed(percept.getParameters().getFirst().toString(),
 														Integer.valueOf(percept.getParameters().getLast().toString()));
 			}
+			//TODO: if opponent saboteur is seen, run away!
 		}
 	}
 	

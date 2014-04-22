@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.lannister.action.Actions;
 import org.lannister.agents.AgentMode;
@@ -52,6 +53,11 @@ public abstract class AgentBrain {
 	protected String position;
 	
 	/**
+	 * Current role
+	 */
+	protected String role;
+	
+	/**
 	 * Current energy
 	 */
 	protected int energy;
@@ -75,6 +81,16 @@ public abstract class AgentBrain {
 	 * Positions of each agent
 	 */
 	protected Map<String, String> positions = new HashMap<String, String>();
+	
+	/**
+	 * Role of each agent
+	 */
+	protected Map<String, String> roles = new HashMap<String, String>();
+	
+	/**
+	 * Health of each agent
+	 */
+	protected Map<String, Integer> healths = new HashMap<String, Integer>();
 	
 	private AgentsCoordinator coordinator;
 	
@@ -111,16 +127,20 @@ public abstract class AgentBrain {
 			plan.update();
 		}
 		
+		// small hack for "GOTO current position" errors
+		if(!plan.isCompleted() && plan.next().equals(position)) {
+			plan.update();
+		}
+		
 		// successful SURVEY action
 		if(action == null && this.action.equals(Actions.SURVEY)) {
 			GraphManager.get().setSurveyed(position);
 		}
-		System.out.println("Finding a suitable action..");
 		// handle succeeded actions
 		if(action == null) {
 			action = handleSucceededAction();
 		}
-		System.out.println("Action found.");
+		System.out.println(name + ": " + action);
 		return action;
 	}
 	
@@ -158,23 +178,9 @@ public abstract class AgentBrain {
 	 * Wait until help is received
 	 */
 	private void initHelp() {
-		switch(mode) {
-			case EXPLORING:	
-				AgentPlanner.abortExploringPlan(plan.getTarget());
-				plan = AgentPlanner.emptyPlan();
-				break;
-			case PROBING:
-				AgentPlanner.abortProbingPlan(plan.getTarget());
-				plan = AgentPlanner.emptyPlan();
-				break;
-			case SURVEYING:
-				AgentPlanner.abortSurveyingPlan(plan.getTarget());
-				plan = AgentPlanner.emptyPlan();
-				break;
-		}
-		
+		AgentPlanner.abortPlan(plan);
+		plan = AgentPlanner.emptyPlan();
 		updateMode(AgentMode.DEFENDING);
-		
 		
 		// TODO: SEARCH ONLY REPAIRERS IN (SURVEYING, EXPLORING, BESTSCORE) MODE
 		
@@ -247,6 +253,14 @@ public abstract class AgentBrain {
 		this.positions = positions;
 	}
 
+	public Map<String, Integer> getHealths() {
+		return healths;
+	}
+	
+	public Map<String, String> getRoles() {
+		return roles;
+	}
+	
 	public boolean isDisabled() {
 		return disabled;
 	}
@@ -292,5 +306,31 @@ public abstract class AgentBrain {
 	
 	public AgentMode getMode() {
 		return mode;
+	}
+
+	public String getRole() {
+		return role;
+	}
+
+	public void setRole(String role) {
+		this.role = role;
+	}
+	
+	public Map<String, String> getDisabledAgentsPositions() {
+		Map<String, String> map = new HashMap<String, String>();
+		for(Entry<String, Integer> entry : healths.entrySet()) {
+			String agentName = entry.getKey();
+			Integer health   = entry.getValue();
+			String position  = positions.get(agentName);
+			if(health == 0) {
+				map.put(agentName, position);
+			}
+		}
+		return map;
+	}
+	
+	protected void abortPlan() {
+		AgentPlanner.abortPlan(plan);
+		plan = AgentPlanner.emptyPlan();
 	}
 }

@@ -16,6 +16,8 @@ public class Percepts {
 	public static String PROBEDVERTEX 		= "probedVertex";
 	public static String SURVEYEDEDGE		= "surveyedEdge";
 	public static String HEALTH				= "health";
+	public static String ROLE				= "role";
+	public static String INSPECTEDENTITY    = "inspectedEntity";
 	
 	// custom percepts
 	public static String HELP				= "help";

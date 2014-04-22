@@ -68,4 +68,9 @@ public class ActionFactory {
 		return energy > Thresholds.ATTACK ? ActionFactory.get().create(Actions.ATTACK, agent)
 				  	: ActionFactory.get().create(Actions.RECHARGE);
 	}
+	
+	public Action inspectOrRecharge(int energy, String agent) {
+		return energy > Thresholds.INSPECT ? ActionFactory.get().create(Actions.INSPECT, agent) 
+					: ActionFactory.get().create(Actions.RECHARGE);
+	}
 }

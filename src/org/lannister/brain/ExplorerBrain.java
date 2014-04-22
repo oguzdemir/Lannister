@@ -21,13 +21,16 @@ public class ExplorerBrain extends AgentBrain {
 		switch (result) { 
 			case ActionResults.FAILRANDOM:
 				return ActionFactory.get().create(action, param);
+			case ActionResults.FAILUNREACHABLE:
 			case ActionResults.FAILUNKNOWN:
-				return ActionFactory.get().create(action, param);
+				abortPlan();
+				return ActionFactory.get().create(Actions.SKIP);
 			case ActionResults.FAILNORESOURCE: 	// recharge
 				return ActionFactory.get().create(Actions.RECHARGE);
 			case ActionResults.FAILATTACKED:   	// defend
 				return ActionFactory.get().create(Actions.SKIP);
 			case ActionResults.FAILSTATUS: 		// disabled
+				AgentPlanner.abortPlan(plan);
 				return ActionFactory.get().create(Actions.SKIP);
 			default: 
 				return null;
@@ -53,9 +56,6 @@ public class ExplorerBrain extends AgentBrain {
 					mode   = plan.isCompleted() ? AgentMode.BESTSCORE 							  	: mode;
 					plan   = plan.isCompleted() ? AgentPlanner.newBestScoringPlan(position, name) 	: plan;
 				}
-				break;
-			case DEFENDING:
-				action = ActionFactory.get().create(Actions.SKIP);
 				break;
 			case BESTSCORE:
 				action = plan.isCompleted() ? ActionFactory.get().create(Actions.SKIP) : ActionFactory.get().gotoOrRecharge(energy, position, plan.next());
