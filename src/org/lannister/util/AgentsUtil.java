@@ -10,7 +10,7 @@ import com.google.common.collect.Lists;
 /**
 author = 'Oguz Demir'
  */
-public class AgentUtil {
+public class AgentsUtil {
 
 	/**
 	 * Returns size of the specific type of agents in the agent set.

@@ -1,16 +1,14 @@
 package org.lannister.agents;
 
-import java.util.LinkedList;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.TreeMap;
-
-import javax.print.attribute.standard.DateTimeAtCompleted;
 
 import org.lannister.EIManager;
 import org.lannister.brain.AgentBrain;
 import org.lannister.brain.AgentBrainFactory;
-import org.lannister.graph.GraphManager;
 import org.lannister.messaging.AgentsCoordinator;
+import org.lannister.util.AgentConfig;
+import org.lannister.util.AgentsConfig;
 
 import eis.iilang.Action;
 
@@ -19,36 +17,33 @@ author = 'Oguz Demir'
  */
 public class AgentsController {
 
-	private Map<String, Agent> agents;
+	private Map<String, Agent> agents = new HashMap<String, Agent>();
 	
-	private LinkedList<String> connections = new LinkedList<String>() {{
-		add("connectionA1");
-		add("connectionA2");
-		add("connectionA3");
-		add("connectionA4");
-		add("connectionA5");
-		add("connectionA6");
-		add("connectionA7");
-		add("connectionA8");
-		add("connectionA9");
-		add("connectionA10");
-		add("connectionA11");
-		add("connectionA12");
-	}};
+	public static int TEAMSIZE = 0;
 	
-	public AgentsController() {
-		agents = new TreeMap<String, Agent>();
+	public AgentsController(String configFile) {
+		AgentsConfig config = new AgentsConfig(configFile);
+		
+		for(AgentConfig conf : config.getAgentConfigs()) {
+			registerAgent(conf.getName(), 
+						  conf.getTeam(), 
+						  conf.getEntity(),
+						  conf.getClazz());
+		}
+		
+		TEAMSIZE = config.getTeamSize();
 	}
 	
-	public void registerAgent(String name, Class<? extends Agent> clazz) {
+	public void registerAgent(String name, String team, String entity, String className) {
 		try {
-			AgentBrain brain = AgentBrainFactory.get().createBrain(name, clazz); 
-			Agent agent 	 = (Agent) clazz.getDeclaredConstructor(String.class, AgentBrain.class).newInstance(name, brain);
+			Class<? extends Agent> clazz = Class.forName(className).asSubclass(Agent.class);
+			AgentBrain brain 			 = AgentBrainFactory.get().createBrain(name, clazz); 
+			Agent agent 	 			 = (Agent) clazz.getDeclaredConstructor(String.class, String.class, AgentBrain.class).newInstance(name, team, brain);
 			agents.put(name, agent);
 			
 			// add it to Environment interface
 			EIManager.register(name);
-			EIManager.associate(name, getConnection());
+			EIManager.associate(name, entity);
 			
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -59,11 +54,6 @@ public class AgentsController {
 		for(Agent agent : agents.values()) {
 			agent.setCoordinator(coordinator);
 		}
-	}
-	
-	// TODO: Implement, parse from xml.
-	private String getConnection() {
-		return connections.removeFirst();
 	}
 	
 	// Start all agents to execute

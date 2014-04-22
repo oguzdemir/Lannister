@@ -15,8 +15,8 @@ author = 'Oguz Demir'
  */
 public class Explorer extends Agent {
 
-	public Explorer(String name, AgentBrain brain) {
-		super(name, brain);
+	public Explorer(String name, String team, AgentBrain brain) {
+		super(name, team, brain);
 	}
 	
 	@Override

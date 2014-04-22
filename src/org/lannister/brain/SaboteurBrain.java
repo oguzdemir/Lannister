@@ -10,35 +10,20 @@ import eis.iilang.Action;
 /**
 author = 'Oguz Demir'
  */
-public class RepairerBrain extends AgentBrain {
+public class SaboteurBrain extends AgentBrain {
 
-	/**
-	 * id of the caller agent for repair
-	 */
-	private String caller;
+	private String target = null;
 	
-	/**
-	 * id of the enemy agent
-	 * @param name
-	 */
-	private String enemy = null; 
-	
-	/**
-	 * id of a teammate
-	 * @param name
-	 */
-	private String friend = null;
-	
-	public RepairerBrain(String name) {
+	public SaboteurBrain(String name) {
 		super(name);
 	}
-	
+
 	@Override
 	protected Action handleFailedAction() {
 		switch (result) { 
 			case ActionResults.FAILRANDOM:
 				return ActionFactory.get().create(action, param);
-			case ActionResults.FAILUNKNOWN:
+			case ActionResults.FAILUNKNOWN:     // no action in the last step
 				return ActionFactory.get().create(action, param);
 			case ActionResults.FAILNORESOURCE: 	// recharge
 				return ActionFactory.get().create(Actions.RECHARGE);
@@ -71,72 +56,43 @@ public class RepairerBrain extends AgentBrain {
 					plan   = plan.isCompleted() ? AgentPlanner.newBestScoringPlan(position, name) : plan;
 				}
 				break;
-			case HELPING:
-				action = plan.isCompleted() ? ActionFactory.get().repairOrRecharge(energy, caller) : ActionFactory.get().gotoOrRecharge(energy, position, plan.next());
-				if(!Actions.isTypeOf(action, Actions.RECHARGE)) {
-					mode   = plan.isCompleted() ? nmode : mode;
-					plan   = plan.isCompleted() ? (mode == AgentMode.EXPLORING ? AgentPlanner.newExploringPlan(position) 		 : (
-												   mode == AgentMode.SURVEYING ? AgentPlanner.newSurveyingPlan(position) 		 : (
-												   mode == AgentMode.BESTSCORE ? AgentPlanner.newBestScoringPlan(position, name) : null 
-														   										 ))) : plan;
-				}
-				break;
 			case BESTSCORE:
-				plan   = AgentPlanner.newBestScoringPlan(position, name);
 				action = plan.isCompleted() ? ActionFactory.get().parryOrRecharge(energy) : ActionFactory.get().gotoOrRecharge(energy, position, plan.next());
 				break;
 			default:
 				action = null;
 		}
+		
 		return action;
-	}
-	
-	public boolean handleHelpCall(String caller) {
-		this.caller = caller;
-		switch(mode) {
-			case EXPLORING:
-				AgentPlanner.abortExploringPlan(plan.getTarget());
-				updateMode(AgentMode.HELPING);
-				plan = AgentPlanner.newCustomPlan(position, positions.get(caller));
-				return true;
-			case SURVEYING:
-				AgentPlanner.abortSurveyingPlan(plan.getTarget());
-				updateMode(AgentMode.HELPING);
-				plan = AgentPlanner.newCustomPlan(position, positions.get(caller));
-				return true;
-			case BESTSCORE:
-				updateMode(AgentMode.HELPING);
-				plan = AgentPlanner.newCustomPlan(position, positions.get(caller));
-				return true;
-			default:
-				return false;
-		}
 	}
 
 	@Override
 	protected Action handleImmediateAction() {
-		if(enemy != null) {
-			enemy = null;
-			return ActionFactory.get().parryOrRecharge(energy);
+		Action action = null;
+		if(target != null && !disabled) {
+			action = ActionFactory.get().attackOrRecharge(energy, target);
+			target = null;
 		}
-		if(friend != null) {
-			String ffriend = friend; friend = null;
-			return ActionFactory.get().repairOrRecharge(energy, ffriend);
-		}
-		return null;
- 	}
-	
+		return action;
+	}
+
 	@Override
 	protected Action handleDisabledAction() {
-		plan = AgentPlanner.newBestScoringPlan(position, name);
+		
+		switch(mode) {
+			case BESTSCORE:
+				System.out.println("I am disabled, let me find way to BS plan.");
+				plan = AgentPlanner.newBestScoringPlan(position, name);
+				break;
+			default:
+				plan = AgentPlanner.emptyPlan();
+				break;
+		}
 		return plan.isCompleted() ? ActionFactory.get().create(Actions.SKIP) : ActionFactory.get().gotoOrRecharge(energy, position, plan.next());
 	}
 	
-	public void setEnemy(String enemy) {
-		this.enemy = enemy;
+	public void setTarget(String target) {
+		this.target = target;
 	}
 	
-	public void setFriend(String friend) {
-		this.friend = friend;
-	}
 }

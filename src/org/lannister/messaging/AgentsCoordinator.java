@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.lannister.agents.Agent;
-import org.lannister.util.AgentUtil;
+import org.lannister.util.AgentsUtil;
 
 /**
 author = 'Oguz Demir'
@@ -42,7 +42,7 @@ public class AgentsCoordinator {
 	 * @param clazz
 	 */
 	public void broadcast(Message message, Class<? extends Agent> clazz) {
-		for(Agent agent : AgentUtil.getOnly(agents.values(), clazz)) {
+		for(Agent agent : AgentsUtil.getOnly(agents.values(), clazz)) {
 			send(message, agent.getAgentName());
 		}
 	}

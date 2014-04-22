@@ -45,6 +45,7 @@ public class AgentPlanner {
 		String target; 
 		target = bases.containsKey(agent) ? bases.get(agent) : bases.put(agent, GraphManager.grabBaseNode());
 		target = target == null ? bases.get(agent) : target;
+		System.out.println("Base found for " + agent + ": " + target);
 		return target == null ? emptyPlan() : plan(current, target);
 	}
 	

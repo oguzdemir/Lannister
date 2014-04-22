@@ -67,11 +67,6 @@ public abstract class AgentBrain {
 	protected int health;
 	
 	/**
-	 * Team
-	 */
-	protected String team;
-	
-	/**
 	 * Name of the agent
 	 */
 	protected String name;
@@ -94,7 +89,22 @@ public abstract class AgentBrain {
 	 * @return
 	 */
 	public Action perform() {
-		Action action = handleFailures();
+		Action action = null;
+		
+		// return an action if disabled
+		if(disabled) {
+			action = handleDisabledAction();
+		}
+		
+		// return an action if there is an immediate call
+		if(action == null) {
+			action = handleImmediateAction();
+		}
+		
+		// return an action if last action failed
+		if(action == null) {
+			action = handleFailedAction();
+		}
 		
 		// successful GOTO action
 		if(action == null && this.action.equals(Actions.GOTO)) {
@@ -105,22 +115,35 @@ public abstract class AgentBrain {
 		if(action == null && this.action.equals(Actions.SURVEY)) {
 			GraphManager.get().setSurveyed(position);
 		}
-		
-		return action == null ? handleSuccess() : action;
+		System.out.println("Finding a suitable action..");
+		// handle succeeded actions
+		if(action == null) {
+			action = handleSucceededAction();
+		}
+		System.out.println("Action found.");
+		return action;
 	}
+	
+	protected abstract Action handleDisabledAction();
+	
+	/**
+	 * Handle perceptual warnings that need an action
+	 * @return
+	 */
+	protected abstract Action handleImmediateAction();
 	
 	/**
 	 * Handle failures that might have happened from last step, 
 	 * such as random failures, attack failures, etc.. 
 	 * @return
 	 */
-	protected abstract Action handleFailures();
+	protected abstract Action handleFailedAction();
 	
 	/**
 	 * Do your next action according to the current plan
 	 * @return
 	 */
-	protected abstract Action handleSuccess();
+	protected abstract Action handleSucceededAction();
 	
 	protected void updateMode(AgentMode newMode) {
 		nmode = mode;
@@ -216,14 +239,6 @@ public abstract class AgentBrain {
 		this.energy = energy;
 	}
 
-	public String getTeam() {
-		return team;
-	}
-
-	public void setTeam(String team) {
-		this.team = team;
-	}
-
 	public Map<String, String> getPositions() {
 		return positions;
 	}
@@ -251,18 +266,22 @@ public abstract class AgentBrain {
 	private boolean sentHelp;
 	
 	public void setHealth(int health) {
-		if(this.health > health && !sentHelp) {
-			sentHelp = true;
-			initHelp();
-		}
-		
-		if(this.health < health && sentHelp) {
-			sentHelp = false;
-			doneHelp();
-		}
+//		if(this.health > health && !sentHelp) {
+//			sentHelp = true;
+//			initHelp();
+//		}
+//		
+//		if(this.health < health && sentHelp) {
+//			sentHelp = false;
+//			doneHelp();
+//		}
 		this.health = health;
 	}
 
+	public int getHealth() {
+		return this.health;
+	}
+	
 	public AgentsCoordinator getCoordinator() {
 		return coordinator;
 	}

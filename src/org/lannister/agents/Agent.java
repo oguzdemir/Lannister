@@ -18,13 +18,15 @@ author = 'Oguz Demir'
 public abstract class Agent {
 
 	protected String name;
+	protected String team;
 	protected int step = -1;
 	protected boolean newStep = false;
 
 	protected AgentBrain brain;
 	
-	public Agent(String name, AgentBrain brain) {
+	public Agent(String name, String team, AgentBrain brain) {
 		this.name 	= name;
+		this.team	= team;
 		this.brain 	= brain;
 	}
 
@@ -51,9 +53,8 @@ public abstract class Agent {
 		handleMessages();
 		
 		if(newStep) {
-			//GraphManager.requestUpdate();
-			GraphManager.get().aps();
-			printInfo();
+			if(brain.getMode() == AgentMode.EXPLORING) GraphManager.get().aps();
+			//printInfo();
 			return brain.perform();
 		}
 		return null;
@@ -106,6 +107,7 @@ public abstract class Agent {
 			}
 			else if(percept.getName().equals(Percepts.HEALTH)) {
 				brain.setHealth(Integer.valueOf(percept.getParameters().getFirst().toString()));
+				brain.setDisabled(brain.getHealth() == 0);
 			}
 			else if(percept.getName().equals(Percepts.LASTACTION)) {
 				brain.setAction(percept.getParameters().getFirst().toString());

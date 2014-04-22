@@ -17,7 +17,7 @@ public class ExplorerBrain extends AgentBrain {
 	}
 
 	@Override
-	protected Action handleFailures() {
+	protected Action handleFailedAction() {
 		switch (result) { 
 			case ActionResults.FAILRANDOM:
 				return ActionFactory.get().create(action, param);
@@ -35,7 +35,7 @@ public class ExplorerBrain extends AgentBrain {
 	}
 
 	@Override
-	protected Action handleSuccess() {
+	protected Action handleSucceededAction() {
 		Action action = null;
 		switch(mode) {
 			case EXPLORING:
@@ -61,9 +61,20 @@ public class ExplorerBrain extends AgentBrain {
 				action = plan.isCompleted() ? ActionFactory.get().create(Actions.SKIP) : ActionFactory.get().gotoOrRecharge(energy, position, plan.next());
 				break;
 			default:
+				action = ActionFactory.get().create(Actions.SKIP);
 				break;
 		}
-		System.out.println(action);
 		return action;
+	}
+
+	@Override
+	protected Action handleImmediateAction() {
+		return null;
+	}
+	
+	@Override
+	protected Action handleDisabledAction() {
+		plan = AgentPlanner.newBestScoringPlan(position, name);
+		return plan.isCompleted() ? ActionFactory.get().create(Actions.SKIP) : ActionFactory.get().gotoOrRecharge(energy, position, plan.next());
 	}
 }

@@ -195,6 +195,8 @@ public class Graph {
 
 			@Override
 			public int compare(String o1, String o2) {
+				if(!pr.containsKey(o2)) return 1;
+				if(!pr.containsKey(o1)) return -1;
 				return pr.get(o1) < pr.get(o2) ? 1 : -1;
 			}
 		});
@@ -236,17 +238,27 @@ public class Graph {
 				}
 	}
 	
+	/**
+	 * This path finding method is dangerous, if you are in a situation where the path between s and d are not known yet
+	 * and you ask for a path, you will end up with an infinite loop.
+	 * @param s
+	 * @param d
+	 * @return
+	 */
 	public LinkedList<String> path(String s, String d) {
 		int i = r.get(s);
 		int j = r.get(d);
 		
 		List<String> path = new LinkedList<String>();
 		
+		int prx = -1;
 		int pre = j;
 		while(i != pre) {
 			String node = rr.get(pre);
 			path.add(node);
+			prx = pre;
 			pre = p[i][pre];
+			if(prx == pre) break;
 		}
 		
 		return new LinkedList<String>(Lists.reverse(path));

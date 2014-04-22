@@ -2,10 +2,9 @@ package org.lannister.graph;
 
 import java.util.LinkedList;
 
+import org.lannister.agents.AgentsController;
+
 public class GraphManager {
-	
-	private static int requestCounts = 0;
-	private static int TEAMSIZE		 = 12;
 	
 	private static Graph graph;
 	
@@ -27,20 +26,8 @@ public class GraphManager {
 	}
 	
 	public static String grabBaseNode() {
-		baseNodes = baseNodes.isEmpty() ? getBaseNodes(TEAMSIZE) : baseNodes;
+		baseNodes = baseNodes.isEmpty() ? getBaseNodes(AgentsController.TEAMSIZE) : baseNodes;
 		return baseNodes.removeFirst();
-	}
-	
-	public static void requestUpdate() {
-		++requestCounts;
-		System.out.println("Request received: " + requestCounts);
-		if(requestCounts == TEAMSIZE) {
-			// everybody requested, run APS algorithm
-			graph.aps();
-			
-			// reset
-			requestCounts = 0;
-		}
 	}
 }
 

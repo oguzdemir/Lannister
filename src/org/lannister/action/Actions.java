@@ -14,6 +14,8 @@ public class Actions {
 	public final static String PARRY		= "parry";
 	public final static String SURVEY		= "survey";
 	public final static String REPAIR     	= "repair";
+	public final static String ATTACK		= "attack";
+	public final static String NOACTION		= "noAction";
 	
 	public static boolean isTypeOf(Action action, String type) {
 		switch(type) {
