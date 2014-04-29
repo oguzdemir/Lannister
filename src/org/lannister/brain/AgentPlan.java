@@ -56,7 +56,8 @@ public class AgentPlan {
 	 * update path after a succesful GOTO action
 	 */
 	public void update() {
-		path.removeFirst();
+		if(!isCompleted())
+			path.removeFirst();
 	}
 	
 	public boolean isCompleted() {
