@@ -4,6 +4,8 @@ import org.lannister.action.ActionFactory;
 import org.lannister.action.ActionResults;
 import org.lannister.action.Actions;
 import org.lannister.agents.AgentMode;
+import org.lannister.agents.AgentTypes;
+import org.lannister.graph.GraphManager;
 
 import eis.iilang.Action;
 
@@ -12,7 +14,11 @@ author = 'Oguz Demir'
  */
 public class SaboteurBrain extends AgentBrain {
 
-	private String target = null;
+	private String targetToFollow;
+	private String targetToAttack;
+	private String followPosition;
+	private String targetToAvoid;
+	private String avoidPosition;
 	
 	public SaboteurBrain(String name) {
 		super(name);
@@ -30,8 +36,10 @@ public class SaboteurBrain extends AgentBrain {
 			case ActionResults.FAILNORESOURCE: 	// recharge
 				return ActionFactory.get().create(Actions.RECHARGE);
 			case ActionResults.FAILATTACKED:   	// defend
+				abortPlan();
 				return ActionFactory.get().create(Actions.PARRY);
 			case ActionResults.FAILSTATUS: 		// disabled
+				abortPlan();
 				return ActionFactory.get().create(Actions.SKIP);
 			default: 
 				return null;
@@ -60,41 +68,62 @@ public class SaboteurBrain extends AgentBrain {
 				break;
 			case BESTSCORE:
 				action = plan.isCompleted() ? ActionFactory.get().parryOrRecharge(energy) : ActionFactory.get().gotoOrRecharge(energy, position, plan.next());
+				if(plan.isCompleted()) System.out.println(name + " : staying in best score pos");
 				break;
-			default:
-				action = null;
 		}
 		
 		return action;
 	}
 
 	@Override
+
 	protected Action handleImmediateAction() {
+		
+		if(targetToAttack != null || targetToFollow != null || targetToAvoid != null) abortPlan();
+		
 		Action action = null;
-		if(target != null && !disabled) {
-			action = ActionFactory.get().attackOrRecharge(energy, target);
-			target = null;
-		}
+		
+		if(action == null) action = targetToAvoid  != null ? ActionFactory.get().runawayOrRecharge(energy, getPosition(), avoidPosition) : null;
+		if(action == null) action = targetToAttack != null ? ActionFactory.get().attackOrRecharge(energy, targetToAttack) : null;
+		if(action == null) action = targetToFollow != null ? ActionFactory.get().gotoOrRecharge(energy, getPosition(), followPosition) : null;
+		
+		targetToAttack = null;
+		targetToFollow = null;
+		targetToAvoid  = null;
+		
 		return action;
 	}
 
 	@Override
 	protected Action handleDisabledAction() {
 		
-		switch(mode) {
-			case BESTSCORE:
-				System.out.println("I am disabled, let me find way to BS plan.");
-				plan = AgentPlanner.newBestScoringPlan(position, name);
-				break;
-			default:
-				plan = AgentPlanner.emptyPlan();
-				break;
-		}
-		return plan.isCompleted() ? ActionFactory.get().create(Actions.SKIP) : ActionFactory.get().gotoOrRecharge(energy, position, plan.next());
+		abortPlan();
+		return ActionFactory.get().create(Actions.SKIP);
 	}
-	
-	public void setTarget(String target) {
-		this.target = target;
+
+	@Override
+	public void handleWhenEnemySeen(String id, String position, String status) {
+		boolean onSameNode 	= GraphManager.get().edgeCost(getPosition(), position) == 0;
+		boolean nearMe	   	= GraphManager.get().edgeCost(getPosition(), position) == 1;
+		boolean notDisabled = !status.equals("disabled");
+		//boolean isSaboteur  = getRoles().containsKey(id) && getRoles().get(id).equals(AgentTypes.SABOTEUR);
+		
+		if(onSameNode && notDisabled) {
+			targetToAttack = id;
+		}
+		else if(nearMe && notDisabled) {
+			targetToFollow = id;
+			followPosition = position;
+		}
+//		else if(isSaboteur && notDisabled) {
+//			targetToAvoid = id;
+//			avoidPosition = position;
+//		}
+	}
+
+	@Override
+	public void handleWhenFriendSeen(String id, String position, String status) {
+		// no action needed
 	}
 	
 }

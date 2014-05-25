@@ -4,6 +4,8 @@ import org.lannister.action.ActionFactory;
 import org.lannister.action.ActionResults;
 import org.lannister.action.Actions;
 import org.lannister.agents.AgentMode;
+import org.lannister.agents.AgentTypes;
+import org.lannister.graph.GraphManager;
 
 import eis.iilang.Action;
 
@@ -12,6 +14,8 @@ author = 'Oguz Demir'
  */
 public class ExplorerBrain extends AgentBrain {
 
+	private String positionToRunAway;
+	
 	public ExplorerBrain(String name) {
 		super(name);
 	}
@@ -19,18 +23,19 @@ public class ExplorerBrain extends AgentBrain {
 	@Override
 	protected Action handleFailedAction() {
 		switch (result) { 
-			case ActionResults.FAILRANDOM:
+			case ActionResults.FAILRANDOM:		// retry
 				return ActionFactory.get().create(action, param);
-			case ActionResults.FAILUNREACHABLE:
-			case ActionResults.FAILUNKNOWN:
+			case ActionResults.FAILUNREACHABLE: //
+			case ActionResults.FAILUNKNOWN: 	// abort and skip this step
 				abortPlan();
 				return ActionFactory.get().create(Actions.SKIP);
 			case ActionResults.FAILNORESOURCE: 	// recharge
 				return ActionFactory.get().create(Actions.RECHARGE);
 			case ActionResults.FAILATTACKED:   	// defend
+				abortPlan();
 				return ActionFactory.get().create(Actions.SKIP);
 			case ActionResults.FAILSTATUS: 		// disabled
-				AgentPlanner.abortPlan(plan);
+				abortPlan();
 				return ActionFactory.get().create(Actions.SKIP);
 			default: 
 				return null;
@@ -59,6 +64,7 @@ public class ExplorerBrain extends AgentBrain {
 				break;
 			case BESTSCORE:
 				action = plan.isCompleted() ? ActionFactory.get().create(Actions.SKIP) : ActionFactory.get().gotoOrRecharge(energy, position, plan.next());
+				if(plan.isCompleted()) System.out.println(name + " : staying in best score pos");
 				break;
 			default:
 				action = ActionFactory.get().create(Actions.SKIP);
@@ -69,12 +75,33 @@ public class ExplorerBrain extends AgentBrain {
 
 	@Override
 	protected Action handleImmediateAction() {
-		return null;
+		
+		if(positionToRunAway != null) abortPlan();
+		
+		try 	{ return positionToRunAway != null ? ActionFactory.get().gotoOrRecharge(energy, getPosition(), positionToRunAway) : null; } 
+		finally { positionToRunAway = null; }
 	}
 	
 	@Override
 	protected Action handleDisabledAction() {
-		plan = AgentPlanner.newBestScoringPlan(position, name);
-		return plan.isCompleted() ? ActionFactory.get().create(Actions.SKIP) : ActionFactory.get().gotoOrRecharge(energy, position, plan.next());
+		abortPlan();
+		
+		return ActionFactory.get().create(Actions.SKIP);
+	}
+
+	@Override
+	public void handleWhenEnemySeen(String id, String position, String status) {
+		boolean nearMe		= GraphManager.get().edgeCost(getPosition(), position) <= 1;
+		boolean isSaboteur  = !getRoles().containsKey(id) || getRoles().get(id).equals(AgentTypes.SABOTEUR);
+		boolean notDisabled  = !status.equals("disabled");
+		if(nearMe && isSaboteur && notDisabled) {
+			positionToRunAway = GraphManager.get().findRunawayNode(getPosition(), position);
+		}
+		
+	}
+
+	@Override
+	public void handleWhenFriendSeen(String id, String position, String status) {
+		// do nothing
 	}
 }

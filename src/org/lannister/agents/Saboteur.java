@@ -24,22 +24,6 @@ public class Saboteur extends Agent {
 	protected void handlePercepts() {
 		List<Percept> percepts = EIManager.getPercepts(getAgentName());
 		handleCommonPercepts(percepts);
-		
-		for(Percept percept : percepts) {
-			if(percept.getName().equals(Percepts.VISIBLEENTITY)) {
-				String id  		= percept.getParameters().get(0).toString();
-				String pos 		= percept.getParameters().get(1).toString();
-				String team		= percept.getParameters().get(2).toString();
-				String status 	= percept.getParameters().get(3).toString();
-				
-				// attack when you see a normal enemy within the attack range (1)
-				if(!team.equals(this.team) && status.equals("normal") && GraphManager.get().edgeCost(brain.getPosition(), pos) <= 1) {
-					SaboteurBrain saboteurBrain = (SaboteurBrain) brain;
-					saboteurBrain.setTarget(id);
-				}
-				// TODO: runaway when the opponent saboteur health is more than yours! 
-			}
-		}
 	} 
 
 	@Override

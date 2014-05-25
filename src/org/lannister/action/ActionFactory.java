@@ -39,7 +39,7 @@ public class ActionFactory {
 	
 	public Action gotoOrRecharge(int energy, String position, String next) {
 		int cost = GraphManager.get().weightCost(position, next);
-		cost = cost == 0 ? Thresholds.ENERGY : cost; 
+		cost = cost == Integer.MAX_VALUE ? Thresholds.ENERGY : cost; 
 		return energy > cost ? ActionFactory.get().create(Actions.GOTO, next)
 				  	: ActionFactory.get().create(Actions.RECHARGE);
 	}
@@ -72,5 +72,11 @@ public class ActionFactory {
 	public Action inspectOrRecharge(int energy, String agent) {
 		return energy > Thresholds.INSPECT ? ActionFactory.get().create(Actions.INSPECT, agent) 
 					: ActionFactory.get().create(Actions.RECHARGE);
+	}
+	
+	public Action runawayOrRecharge(int energy, String position, String enemyPosition) {
+		String newPosition = GraphManager.get().findRunawayNode(position, enemyPosition);
+		return gotoOrRecharge(energy, position, newPosition);
+																						
 	}
 }

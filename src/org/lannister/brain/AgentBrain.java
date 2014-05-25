@@ -9,6 +9,7 @@ import java.util.Map.Entry;
 import org.lannister.action.Actions;
 import org.lannister.agents.AgentMode;
 import org.lannister.agents.AgentTypes;
+import org.lannister.brain.AgentPlan.PlanType;
 import org.lannister.graph.GraphManager;
 import org.lannister.messaging.AgentsCoordinator;
 import org.lannister.messaging.Messages;
@@ -97,11 +98,11 @@ public abstract class AgentBrain {
 	public AgentBrain(String name) {
 		this.name = name;
 		this.mode = AgentMode.EXPLORING;
-		this.plan = AgentPlanner.emptyPlan();
+		this.plan = AgentPlanner.emptyPlan(PlanType.EXPLORING);
 	}
 	
 	/**
-	 * This is where brain ticks and tacks.
+	 * This is where brain ticks and tocks.
 	 * @return
 	 */
 	public Action perform() {
@@ -165,6 +166,16 @@ public abstract class AgentBrain {
 	 */
 	protected abstract Action handleSucceededAction();
 	
+	/**
+	 * Update internals when enemy is seen
+	 */
+	public abstract void handleWhenEnemySeen(String id, String position, String status);
+	
+	/**
+	 * Update internals when friend is seen
+	 */
+	public abstract void handleWhenFriendSeen(String id, String position, String status);
+	
 	protected void updateMode(AgentMode newMode) {
 		nmode = mode;
 		mode  = newMode;
@@ -174,36 +185,34 @@ public abstract class AgentBrain {
 		mode = nmode;
 	}
 	
-	/**
-	 * Wait until help is received
-	 */
-	private void initHelp() {
-		AgentPlanner.abortPlan(plan);
-		plan = AgentPlanner.emptyPlan();
-		updateMode(AgentMode.DEFENDING);
-		
-		// TODO: SEARCH ONLY REPAIRERS IN (SURVEYING, EXPLORING, BESTSCORE) MODE
-		
-		List<Pair<Integer, String>> costs = new ArrayList<Pair<Integer, String>>();
-		
-		for(String agentName : positions.keySet()) {
-			if(AgentTypes.isTypeOf(agentName, AgentTypes.REPAIRER)) {
-				Integer cost = GraphManager.get().edgeCost(position, positions.get(agentName));
-				costs.add(new Pair<Integer, String>(cost, agentName));
-			}
-		}
-		
-		// find closest
-		Pair<Integer, String> cost = Ordering.natural().min(costs);
-		
-		// send message
-		String repairerName = cost.second();
-		coordinator.send(Messages.create(name, new Percept(Percepts.HELP)), repairerName);
-	}
+//	/**
+//	 * Wait until help is received
+//	 */
+//	private void initHelp() {
+//		AgentPlanner.abortPlan(plan);
+//		plan = AgentPlanner.emptyPlan();
+//		updateMode(AgentMode.DEFENDING);
+//		
+//		List<Pair<Integer, String>> costs = new ArrayList<Pair<Integer, String>>();
+//		
+//		for(String agentName : positions.keySet()) {
+//			if(AgentTypes.isTypeOf(agentName, AgentTypes.REPAIRER)) {
+//				Integer cost = GraphManager.get().edgeCost(position, positions.get(agentName));
+//				costs.add(new Pair<Integer, String>(cost, agentName));
+//			}
+//		}
+//		
+//		// find closest
+//		Pair<Integer, String> cost = Ordering.natural().min(costs);
+//		
+//		// send message
+//		String repairerName = cost.second();
+//		coordinator.send(Messages.create(name, new Percept(Percepts.HELP)), repairerName);
+//	}
 	
-	private void doneHelp() {
-		revertMode();
-	}
+//	private void doneHelp() {
+//		revertMode();
+//	}
 	
 	public String getAction() {
 		return action;
@@ -331,6 +340,12 @@ public abstract class AgentBrain {
 	
 	protected void abortPlan() {
 		AgentPlanner.abortPlan(plan);
-		plan = AgentPlanner.emptyPlan();
+		switch(plan.type) {
+			case BESTSCORE: plan = AgentPlanner.emptyPlan(PlanType.BESTSCORE); break;
+			case PROBING:   plan = AgentPlanner.emptyPlan(PlanType.PROBING);   break;
+			case REPAIRING: plan = AgentPlanner.emptyPlan(PlanType.REPAIRING); break;
+			case SURVEYING: plan = AgentPlanner.emptyPlan(PlanType.SURVEYING); break;
+			case EXPLORING: plan = AgentPlanner.emptyPlan(PlanType.EXPLORING); break;
+		}
 	}
 }

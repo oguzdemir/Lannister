@@ -4,6 +4,8 @@ import org.lannister.action.ActionFactory;
 import org.lannister.action.ActionResults;
 import org.lannister.action.Actions;
 import org.lannister.agents.AgentMode;
+import org.lannister.agents.AgentTypes;
+import org.lannister.graph.GraphManager;
 
 import eis.iilang.Action;
 
@@ -12,7 +14,8 @@ author = 'Oguz Demir'
  */
 public class SentinelBrain extends AgentBrain {
 
-	private String enemy = null;
+	private String enemy;
+	private String enemyPos;
 	
 	public SentinelBrain(String name) {
 		super(name);
@@ -20,15 +23,16 @@ public class SentinelBrain extends AgentBrain {
 
 	@Override
 	protected Action handleDisabledAction() {
-		plan = AgentPlanner.newBestScoringPlan(position, name);
-		return plan.isCompleted() ? ActionFactory.get().create(Actions.SKIP) : ActionFactory.get().gotoOrRecharge(energy, position, plan.next());
+		abortPlan();
+		return ActionFactory.get().create(Actions.SKIP);
 	}
 
 	@Override
 	protected Action handleImmediateAction() {
 		if(enemy != null) {
+			abortPlan();
 			enemy = null;
-			return ActionFactory.get().parryOrRecharge(energy);
+			return ActionFactory.get().runawayOrRecharge(energy, getPosition(), enemyPos);
 		}
 		return null;
 	}
@@ -45,8 +49,10 @@ public class SentinelBrain extends AgentBrain {
 			case ActionResults.FAILNORESOURCE: 	// recharge
 				return ActionFactory.get().create(Actions.RECHARGE);
 			case ActionResults.FAILATTACKED:   	// defend
+				abortPlan();
 				return ActionFactory.get().create(Actions.PARRY);
 			case ActionResults.FAILSTATUS: 		// disabled
+				abortPlan();
 				return ActionFactory.get().create(Actions.SKIP);
 			default: 
 				return null;
@@ -75,12 +81,26 @@ public class SentinelBrain extends AgentBrain {
 				break;
 			case BESTSCORE:
 				action = plan.isCompleted() ? ActionFactory.get().parryOrRecharge(energy) : ActionFactory.get().gotoOrRecharge(energy, position, plan.next());
+				if(plan.isCompleted()) System.out.println(name + " : staying in best score pos");
 				break;
 		}
 		return action;
 	}
 
-	public void setEnemy(String enemy) {
-		this.enemy = enemy;
+	@Override
+	public void handleWhenEnemySeen(String id, String position, String status) {
+		boolean nearMe 		= GraphManager.get().edgeCost(getPosition(), position) <= 1;
+		boolean notDisabled = !status.equals("disabled");
+		boolean isSaboteur 	= !getRoles().containsKey(id) || getRoles().get(id).equals(AgentTypes.SABOTEUR);
+		
+		if(nearMe && notDisabled && isSaboteur) {
+			enemy 	 = id;
+			enemyPos = position;
+		}
+	}
+
+	@Override
+	public void handleWhenFriendSeen(String id, String position, String status) {
+		// no action
 	}
 }

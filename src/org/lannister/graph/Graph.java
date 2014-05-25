@@ -3,16 +3,23 @@ package org.lannister.graph;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
+import java.util.Set;
 import java.util.TreeSet;
 
+import org.lannister.graph.BFS.BFSPredicate;
+
+import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 public class Graph {
 	
+	private static int VERTEXCOUNT = 400;
 	private int MAX_INT = 1000000000;
 	
 	// maps internal representation of nodes
@@ -22,16 +29,22 @@ public class Graph {
 	// probed information of nodes
 	private Map<String, Integer> pr = new HashMap<String, Integer>();
 	
-	private int[][]   g = new int[400][400]; // g[i][j] = 1 if there is an edge, else zero
-	private int[][]   d = new int[400][400]; // d[i][j] represents the shortest edge distance 
-	private int[][]   p = new int[400][400]; // predecessor info for path finding
-	private int[][]   w = new int[400][400]; // w[i][j] represents edge cost between i and j if they are neighbors, else zero
-	private boolean[] v = new boolean[400];  // visited info for vertices
-	private boolean[] s = new boolean[400];  // surveyed info for vertices
+	private int[][]   g = new int[VERTEXCOUNT][VERTEXCOUNT]; // g[i][j] = 1 if there is an edge, else zero
+	private int[][]   d = new int[VERTEXCOUNT][VERTEXCOUNT]; // d[i][j] represents the shortest edge distance 
+	private int[][]   p = new int[VERTEXCOUNT][VERTEXCOUNT]; // predecessor info for path finding
+	private int[][]   w = new int[VERTEXCOUNT][VERTEXCOUNT]; // w[i][j] represents edge cost between i and j if they are neighbors, else zero
+	private boolean[] v = new boolean[VERTEXCOUNT];  // visited info for vertices
+	private boolean[] s = new boolean[VERTEXCOUNT];  // surveyed info for vertices
 	private int       cur 		= 0;
 	private int 	  visited 	= 0;
 	private int 	  probed	= 0;
 	private int 	  surveyed  = 0;
+	
+	public Graph() {
+		for(int i = 0; i < VERTEXCOUNT; i++)
+			for(int j = 0; j < VERTEXCOUNT; j++) 
+				w[i][j] = Integer.MAX_VALUE;
+	}
 	
 	// register a new vertex
 	private void register(String v) {
@@ -57,6 +70,43 @@ public class Graph {
 		int j = r.get(v2);
 		g[i][j] = g[j][i] = w;
 	}
+	
+	// equivalent of getUnvisited method, but it doesn't require that aps is run before.
+	private String getUnvisitedBFS(String vertex, final Collection<String> otherAgentsTargets) {
+		// register target nodes if they are not known by the agent
+		for(String target : otherAgentsTargets) {
+			if(!isKnown(target)) {
+				register(target);
+			}
+		}
+		final int i = r.get(vertex);
+		LinkedList<Integer> path = BFS.run(g, cur, i, new BFSPredicate() {
+
+			@Override
+			public boolean isTrue(int t) {
+				return i != t && !v[t] && !otherAgentsTargets.contains(rr.get(t));
+			}
+			
+		});
+		
+		return path.isEmpty() ? null : rr.get(path.getLast());
+	}
+	
+	private LinkedList<String> pathBFS(final String s, final String d) {
+		// find path
+		LinkedList<Integer> path = BFS.run(g, cur, r.get(s), new BFSPredicate() {
+			public boolean isTrue(int t) {
+				return t == r.get(d);
+			}
+		});
+		// convert and return
+		return new LinkedList<String>(Lists.transform(path, new Function<Integer, String>() {
+			@Override
+			public String apply(Integer i) {
+				return rr.get(i);
+			}
+		}));
+ 	}
 	
 	// gets an unvisited closest vertex that no other agent is targetted that vertex.
 	// takes O(n) time where n is the size of vertices
@@ -106,6 +156,31 @@ public class Graph {
 		return !pr.containsKey(rr.get(cand)) ? rr.get(cand) : null;
 	}
 	
+	// equivalent of getUnprobed method, but it doesn't require that aps is run before.
+	private String getUnprobedBFS(String vertex, final Collection<String> otherAgentsTargets) {
+		// register target nodes if they are not known by the agent
+		for(String target : otherAgentsTargets) {
+			if(!isKnown(target)) {
+				register(target);
+			}
+		}
+		final int i = r.get(vertex);
+		LinkedList<Integer> path = BFS.run(g, cur, r.get(vertex), new BFSPredicate() {
+
+			@Override
+			public boolean isTrue(int t) {
+				return i != t && !pr.containsKey(rr.get(t)) && !otherAgentsTargets.contains(rr.get(t));
+			}
+			
+		});
+		
+		String res = path.isEmpty() ? null : rr.get(path.getLast());
+		
+		System.out.println(res + " unprobed " + cur);
+		
+		return res;
+	}
+	
 	// gets an unsurveyed closest vertex that no other agent is targetted that vertex.
 	public String getUnsurveyed(String vertex, Collection<String> otherAgentsTargets) {
 		// register target nodes if they are not known by the agent
@@ -129,6 +204,27 @@ public class Graph {
 		return !s[cand] ? rr.get(cand) : null;
 	}
 	
+	// equivalent of getUnsurveyed method, but it doesn't require that aps is run before.
+	private String getUnsurveyedBFS(String vertex, final Collection<String> otherAgentsTargets) {
+		// register target nodes if they are not known by the agent
+		for(String target : otherAgentsTargets) {
+			if(!isKnown(target)) {
+				register(target);
+			}
+		}
+		final int i = r.get(vertex);
+		LinkedList<Integer> path = BFS.run(g, cur, i, new BFSPredicate() {
+
+			@Override
+			public boolean isTrue(int t) {
+				return i != t && !s[t] && !otherAgentsTargets.contains(rr.get(t));
+			}
+			
+		});
+		
+		return path.isEmpty() ? null : rr.get(path.getLast());
+	}
+	
 	public String getClosest(String vertex, Collection<String> otherVertices) {
 		// register target nodes if they are not known by the agent
 		for(String target : otherVertices) {
@@ -145,6 +241,52 @@ public class Graph {
 			cost = d[i][j] < cost ? d[i][j] : cost;
 		}
 		return rr.get(cand);
+	}
+	
+	private String getClosestBFS(String vertex, final Collection<String> otherVertices) {
+		// register target nodes if they are not known by the agent
+		for(String target : otherVertices) {
+			if(!isKnown(target)) {
+				register(target);
+			}
+		}
+		
+		int j = BFS.run(g, cur, r.get(vertex), new BFSPredicate() {
+			public boolean isTrue(int t) {
+				return otherVertices.contains(rr.get(t));
+			}
+		}).getLast();
+		
+		return rr.get(j);
+	}
+	
+	// distance between pos1 and pos2 should be one or zero, 
+	// finds best pos3 such that dist(pos3, pos2) > dist(pos1, pos2) and dist(pos3, pos1) == 1 and cost(pos3,pos1) == minimum possible.
+	public String findRunawayNode(String pos1, String pos2) {
+		if(!isKnown(pos1)) register(pos1);
+		if(!isKnown(pos2)) register(pos2);
+		
+		int i = r.get(pos1);
+		int j = r.get(pos2);
+		int m = MAX_INT;
+		int r = -1;
+		for(int k = 0; k < cur; k++) {
+			if(d[k][j] > d[i][j] && d[k][i] == 1) {
+				m = Math.min(w[k][i], m);
+				r = w[k][i] == m ? k : r;
+			}
+		}
+		return r == -1 ? null : rr.get(r);
+	}
+	
+	private String findRunawayNodeBFS(String pos1, String pos2) {
+		int i = r.get(pos1);
+		int j = r.get(pos2);
+		
+		for(int k = 0; k < cur; k++) {
+			if(g[i][k] == 1 && g[j][k] == 0) return rr.get(k);
+		}
+		return null;
 	}
 	
 	// removes a node from unvisited queue
@@ -172,7 +314,7 @@ public class Graph {
 		int i = r.get(vertex1);
 		int j = r.get(vertex2);
 		
-		w[i][j] = w[j][i] = Math.max(w[i][j], value);
+		w[i][j] = w[j][i] = value;
 	}
 	
 	public boolean isProbed(String vertex) {
@@ -276,10 +418,10 @@ public class Graph {
 			path.add(node);
 			prx = pre;
 			pre = p[i][pre];
-			if(prx == pre) break;
+			if(prx == pre) break; // things didn't go well, break.
 		}
 		
-		return new LinkedList<String>(Lists.reverse(path));
+		return prx != pre ? new LinkedList<String>(Lists.reverse(path)) : new LinkedList<String>();
 	}
 	
 	/**
@@ -289,6 +431,8 @@ public class Graph {
 	 * @return
 	 */
 	public int weightCost(String s1, String s2) {
+		if(!isKnown(s1) || !isKnown(s2)) return MAX_INT;
+		
 		int i = r.get(s1);
 		int j = r.get(s2);
 		return w[i][j];
@@ -301,8 +445,20 @@ public class Graph {
 	 * @return
 	 */
 	public int edgeCost(String s1, String s2) {
+		if(!isKnown(s1) || !isKnown(s2)) return MAX_INT;
+		
 		int i = r.get(s1);
 		int j = r.get(s2);
 		return d[i][j];
+	}
+	
+	private int edgeCostBFS(final String s1, final String s2) {
+		if(!isKnown(s1) || !isKnown(s2)) return MAX_INT;
+		List<Integer> path = BFS.run(g, cur, r.get(s1), new BFSPredicate() {
+			public boolean isTrue(int t) {
+				return r.get(s2) == t;
+			}
+		});
+		return path == null ? MAX_INT : path.size();
 	}
 }

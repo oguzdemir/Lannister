@@ -5,6 +5,7 @@ import org.lannister.action.ActionResults;
 import org.lannister.action.Actions;
 import org.lannister.agents.AgentMode;
 import org.lannister.brain.AgentPlan.PlanType;
+import org.lannister.graph.GraphManager;
 
 import eis.iilang.Action;
 
@@ -13,7 +14,7 @@ author = 'Oguz Demir'
  */
 public class InspectorBrain extends AgentBrain {
 
-	private String enemy;
+	private String enemyToBeInspected;
 	
 	public InspectorBrain(String name) {
 		super(name);
@@ -21,36 +22,35 @@ public class InspectorBrain extends AgentBrain {
 
 	@Override
 	protected Action handleDisabledAction() {
-		Action action = null;
-		plan 	= plan.type != PlanType.BESTSCORE ? AgentPlanner.newBestScoringPlan(position, name) : plan;
-		action 	= plan.isCompleted() ? ActionFactory.get().create(Actions.SKIP) : ActionFactory.get().gotoOrRecharge(energy, position, plan.next());
-		plan 	= plan.isCompleted() ? AgentPlanner.newBestScoringPlan(position, name) : plan;
-		return action;
+		abortPlan();
+		return ActionFactory.get().create(Actions.SKIP);
 	}
 
 	@Override
 	protected Action handleImmediateAction() {
-		if(enemy != null) {
-			String eenemy = enemy; enemy = null;
-			return ActionFactory.get().inspectOrRecharge(energy, eenemy);
-		}
-		return null;
+		
+		if(enemyToBeInspected != null) abortPlan();
+		
+		try 	{ return enemyToBeInspected != null ? ActionFactory.get().inspectOrRecharge(energy, enemyToBeInspected) : null; }
+		finally { enemyToBeInspected = null; }
 	}
 
 	@Override
 	protected Action handleFailedAction() {
 		switch (result) { 
-			case ActionResults.FAILRANDOM:
+			case ActionResults.FAILRANDOM:		// retry
 				return ActionFactory.get().create(action, param);
 			case ActionResults.FAILUNKNOWN:
-			case ActionResults.FAILUNREACHABLE:
+			case ActionResults.FAILUNREACHABLE:	// abort and skip this step
 				abortPlan();
 				return ActionFactory.get().create(Actions.SKIP);
 			case ActionResults.FAILNORESOURCE: 	// recharge
 				return ActionFactory.get().create(Actions.RECHARGE);
 			case ActionResults.FAILATTACKED:   	// defend
+				abortPlan();
 				return ActionFactory.get().create(Actions.SKIP);
 			case ActionResults.FAILSTATUS: 		// disabled
+				abortPlan();
 				return ActionFactory.get().create(Actions.SKIP);
 			default: 
 				return null;
@@ -79,13 +79,25 @@ public class InspectorBrain extends AgentBrain {
 				break;
 			case BESTSCORE:
 				action = plan.isCompleted() ? ActionFactory.get().create(Actions.SKIP) : ActionFactory.get().gotoOrRecharge(energy, position, plan.next());
+				if(plan.isCompleted()) System.out.println(name + " : staying in best score pos");
 				break;
 		}
 		return action;
 	}
-	
-	public void setEnemy(String enemy) {
-		this.enemy = enemy;
+
+	@Override
+	public void handleWhenEnemySeen(String id, String position, String status) {
+		boolean nearMe 			= GraphManager.get().edgeCost(getPosition(), position) <= 1;
+		boolean notSeenBefore 	= !getRoles().containsKey(id);
+		
+		if(nearMe && notSeenBefore) {
+			enemyToBeInspected = id;
+		}
+	}
+
+	@Override
+	public void handleWhenFriendSeen(String id, String position, String status) {
+		// no action necessary
 	}
 
 }

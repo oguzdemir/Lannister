@@ -54,7 +54,6 @@ public abstract class Agent {
 		
 		if(newStep) {
 			if(brain.getMode() == AgentMode.EXPLORING) GraphManager.get().aps();
-			//printInfo();
 			return brain.perform();
 		}
 		return null;
@@ -122,6 +121,18 @@ public abstract class Agent {
 			else if(percept.getName().equals(Percepts.ROLE)) {
 				brain.setRole(percept.getParameters().getFirst().toString());
 				brain.getCoordinator().broadcast(Messages.create(getAgentName(), percept));
+			}
+			else if(percept.getName().equals(Percepts.VISIBLEENTITY)) {
+				String id  		= percept.getParameters().get(0).toString();
+				String pos 		= percept.getParameters().get(1).toString();
+				String team		= percept.getParameters().get(2).toString();
+				String status 	= percept.getParameters().get(3).toString();
+				if(!team.equals(this.team)) {
+					brain.handleWhenEnemySeen(id, pos, status);
+				}
+				else {
+					brain.handleWhenFriendSeen(id, pos, status);
+				}
 			}
 		}
 		return newStep;

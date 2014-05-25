@@ -10,7 +10,7 @@ author = 'Oguz Demir'
 public class AgentPlan {
 	
 	protected enum PlanType {
-		BESTSCORE, EXPLORING, SURVEYING, CUSTOM, REPAIRING, PROBING
+		BESTSCORE, EXPLORING, SURVEYING, REPAIRING, PROBING
 	}
 	
 	/**
@@ -33,10 +33,12 @@ public class AgentPlan {
 	 */
 	private LinkedList<String> path;
 	
+	private boolean actionDone = false;
+	
 	public AgentPlan(String current, String target, PlanType type) {
 		this.target = target;
 		this.type   = type;
-		path = GraphManager.get().path(current, target);
+		this.path = GraphManager.get().path(current, target);
 	}
 	
 	public AgentPlan(String current, String target, String targetAgent, PlanType type) {
@@ -44,8 +46,10 @@ public class AgentPlan {
 		this.targetAgent = targetAgent;
 	}
 	
-	public AgentPlan() {
-		path = new LinkedList<String>();
+	public AgentPlan(PlanType type) {
+		this.path 		= new LinkedList<String>();
+		this.type 		= type;
+		this.actionDone = true;
 	}
 	
 	public String next() {
@@ -70,5 +74,17 @@ public class AgentPlan {
 	
 	public String getTargetAgent() {
 		return targetAgent;
+	}
+	
+	public PlanType getType() {
+		return type;
+	}
+	
+	public boolean isActionDone() {
+		return actionDone;
+	}
+	
+	public void actionDone() {
+		actionDone = true;
 	}
 }

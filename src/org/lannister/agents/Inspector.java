@@ -27,20 +27,7 @@ public class Inspector extends Agent {
 		handleCommonPercepts(percepts);
 		
 		for(Percept percept : percepts) {
-			if(percept.getName().equals(Percepts.VISIBLEENTITY)) {
-				String id  		= percept.getParameters().get(0).toString();
-				String pos 		= percept.getParameters().get(1).toString();
-				String team		= percept.getParameters().get(2).toString();
-				String status 	= percept.getParameters().get(3).toString();
-				
-				if(!team.equals(this.team) 												// not in my team
-						&& GraphManager.get().edgeCost(brain.getPosition(), pos) <= 1 	// and max 1 edge distance
-						&& !brain.getRoles().containsKey(id)) {							// and not inspected before
-					InspectorBrain inspectorBrain = (InspectorBrain) brain;
-					inspectorBrain.setEnemy(id);
-				}
-			}
-			else if(percept.getName().equals(Percepts.INSPECTEDENTITY)) {
+			if(percept.getName().equals(Percepts.INSPECTEDENTITY)) {
 				String id = percept.getParameters().get(0).toString();
 				String team = percept.getParameters().get(1).toString();
 				String role = percept.getParameters().get(2).toString();
