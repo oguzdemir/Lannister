@@ -80,8 +80,9 @@ public class RepairerBrain extends AgentBrain {
 					break;
 				case REPAIRING:
 					action = ActionFactory.get().repairOrRecharge(energy, plan.getTargetAgent());
-					if(Actions.isTypeOf(action, Actions.REPAIR)) plan.actionDone();
-					break;
+					if(Actions.isTypeOf(action, Actions.REPAIR)) { plan.actionDone(); 
+																   AgentPlanner.removeRepairingTarget(plan.getTargetAgent()); }
+ 					break;
 				case BESTSCORE:
 					action = ActionFactory.get().parryOrRecharge(energy);
 					if(Actions.isTypeOf(action, Actions.PARRY)) plan.actionDone();
@@ -89,7 +90,22 @@ public class RepairerBrain extends AgentBrain {
 			}
 		}
 		else {
-			action = ActionFactory.get().gotoOrRecharge(energy, position, plan.next());
+			switch(plan.type) {
+				case REPAIRING:
+					boolean stillDisabled = getHealths().get(plan.getTargetAgent()) == 0;
+					if(stillDisabled) {
+						action = ActionFactory.get().gotoOrRecharge(energy, position, plan.next());
+					}
+					else {
+						abortPlan();
+						action = ActionFactory.get().create(Actions.SKIP);
+					}
+					break;
+				default:
+					action = ActionFactory.get().gotoOrRecharge(energy, position, plan.next());
+					break;
+			}
+			
 		}
 		return action;
 	}
@@ -219,22 +235,30 @@ public class RepairerBrain extends AgentBrain {
 		}
 	}
 	
-	private AgentPlan planExploreOrHelp() {
-		Map<String, String> disabledAgentsPositions = getDisabledAgentsPositions();
-		return disabledAgentsPositions.isEmpty() ? AgentPlanner.newExploringPlan(position)
-												 : AgentPlanner.newRepairingPlan(position, disabledAgentsPositions);
-	}
+//	@Override
+//	protected void abortPlan() {
+//		super.abortPlan();
+//		
+//		friend = enemy = null;
+//		friendPos = enemyPos = null;
+//	}
 	
-	private AgentPlan planSurveyOrHelp() {
-		Map<String, String> disabledAgentsPositions = getDisabledAgentsPositions();
-		return disabledAgentsPositions.isEmpty() ? AgentPlanner.newSurveyingPlan(position)
-												 : AgentPlanner.newRepairingPlan(position, disabledAgentsPositions);
-	}
-	
-	private AgentPlan planStayOrHelp() {
-		Map<String, String> disabledAgentsPositions = getDisabledAgentsPositions();
-		return disabledAgentsPositions.isEmpty() ? AgentPlanner.emptyPlan(PlanType.REPAIRING)
-												 : AgentPlanner.newRepairingPlan(position, disabledAgentsPositions);
-	}
+//	private AgentPlan planExploreOrHelp() {
+//		Map<String, String> disabledAgentsPositions = getDisabledAgentsPositions();
+//		return disabledAgentsPositions.isEmpty() ? AgentPlanner.newExploringPlan(position)
+//												 : AgentPlanner.newRepairingPlan(position, disabledAgentsPositions);
+//	}
+//	
+//	private AgentPlan planSurveyOrHelp() {
+//		Map<String, String> disabledAgentsPositions = getDisabledAgentsPositions();
+//		return disabledAgentsPositions.isEmpty() ? AgentPlanner.newSurveyingPlan(position)
+//												 : AgentPlanner.newRepairingPlan(position, disabledAgentsPositions);
+//	}
+//	
+//	private AgentPlan planStayOrHelp() {
+//		Map<String, String> disabledAgentsPositions = getDisabledAgentsPositions();
+//		return disabledAgentsPositions.isEmpty() ? AgentPlanner.emptyPlan(PlanType.REPAIRING)
+//												 : AgentPlanner.newRepairingPlan(position, disabledAgentsPositions);
+//	}
 
 }

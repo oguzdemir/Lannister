@@ -12,7 +12,7 @@ public class ActionResults {
 	/**
 	 * The agent attempted to move (goto) to a node that is not connected to its current one.
 	 */
-	public final static String FAILUNREACHABLE 	= "failed_ureachable";
+	public final static String FAILUNREACHABLE 	= "failed_unreachable";
 	
 	/**
 	 * The agent does not have enough resources to execute the

@@ -76,7 +76,6 @@ public class ActionFactory {
 	
 	public Action runawayOrRecharge(int energy, String position, String enemyPosition) {
 		String newPosition = GraphManager.get().findRunawayNode(position, enemyPosition);
-		return gotoOrRecharge(energy, position, newPosition);
-																						
+		return gotoOrRecharge(energy, position, newPosition);																
 	}
 }

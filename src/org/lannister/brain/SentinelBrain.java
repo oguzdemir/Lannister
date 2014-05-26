@@ -80,6 +80,7 @@ public class SentinelBrain extends AgentBrain {
 				}
 				break;
 			case BESTSCORE:
+				plan   = plan.isCompleted() ? AgentPlanner.newBestScoringPlan(position, name) : plan;
 				action = plan.isCompleted() ? ActionFactory.get().parryOrRecharge(energy) : ActionFactory.get().gotoOrRecharge(energy, position, plan.next());
 				if(plan.isCompleted()) System.out.println(name + " : staying in best score pos");
 				break;
@@ -103,4 +104,11 @@ public class SentinelBrain extends AgentBrain {
 	public void handleWhenFriendSeen(String id, String position, String status) {
 		// no action
 	}
+	
+//	@Override
+//	protected void abortPlan() {
+//		super.abortPlan();
+//		
+//		enemy = enemyPos = null;
+//	}
 }

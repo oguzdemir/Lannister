@@ -6,6 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.lannister.agents.AgentsController;
 import org.lannister.brain.AgentPlan.PlanType;
 import org.lannister.graph.GraphManager;
 
@@ -14,10 +15,10 @@ author = 'Oguz Demir'
  */
 public class AgentPlanner {
 	
-	private static List<String> exploringTargets = new LinkedList<String>();
-	private static List<String> surveyingTargets = new LinkedList<String>();
-	private static List<String> probingTargets	 = new LinkedList<String>();
-	private static List<String> repairingTargets = new LinkedList<String>();
+	private static List<String> exploringTargets = new LinkedList<String>(); // targetted explore nodes
+	private static List<String> surveyingTargets = new LinkedList<String>(); // targetted survey nodes
+	private static List<String> probingTargets	 = new LinkedList<String>(); // targetted probe nodes
+	private static List<String> repairingTargets = new LinkedList<String>(); // targetted disabled agents
 	
 	private static Map<String, String> bases     = new HashMap<String, String>(); 
 	
@@ -51,17 +52,17 @@ public class AgentPlanner {
 	public static AgentPlan newBestScoringPlan(String current, String agent) {
 		String target = bases.containsKey(agent) ? bases.get(agent) : bases.put(agent, GraphManager.grabBaseNode());
 		target = target == null ? bases.get(agent) : target;
-		System.out.println("Base found for " + agent + ": " + target);
 		return target == null ? emptyPlan(PlanType.BESTSCORE) : plan(current, target, PlanType.BESTSCORE);
 	}
 	
 	public static AgentPlan newRepairingPlan(String current, Map<String, String> disabledAgentPositions) {
-		String target = findUnrepairedTarget(current, disabledAgentPositions.values());
-		for(String agent : disabledAgentPositions.keySet()) {
-			if(disabledAgentPositions.get(agent).equals(target))
-				return plan(current, target, agent, PlanType.REPAIRING);
-		}
-		return emptyPlan(PlanType.REPAIRING);
+		String agent = findUnrepairedAgent(current, disabledAgentPositions);
+		return agent == null ? emptyPlan(PlanType.REPAIRING) : plan(current, disabledAgentPositions.get(agent), agent, PlanType.REPAIRING);
+	}
+	
+	public static AgentPlan newRandomWalkPlan(String current) {
+		String target = GraphManager.get().findRandomNode(current);
+		return plan(current, target, PlanType.RANDOMWALK);
 	}
 	
 	public static void abortPlan(AgentPlan plan) {
@@ -73,7 +74,7 @@ public class AgentPlanner {
 				abortSurveyingPlan(plan.getTarget());
 				break;
 			case REPAIRING:
-				abortRepairingPlan(plan.getTarget());
+				abortRepairingPlan(plan.getTargetAgent());
 				break;
 			case PROBING:
 				abortProbingPlan(plan.getTarget());
@@ -93,34 +94,49 @@ public class AgentPlanner {
 		surveyingTargets.remove(target);
 	}
 	
-	private static void abortRepairingPlan(String target) {
-		repairingTargets.remove(target);
+	private static void abortRepairingPlan(String agent) {
+		repairingTargets.remove(agent);
+	}
+	
+	public static void removeRepairingTarget(String agent) {
+		repairingTargets.remove(agent);
+	}
+	
+	private static String findUnrepairedAgent(String current, Map<String, String> disabledAgentPositions) {
+		String target = findUnrepairedTarget(current, disabledAgentPositions.values());
+		for(String agent : disabledAgentPositions.keySet()) {
+			if(disabledAgentPositions.get(agent).equals(target))
+				repairingTargets.add(agent);
+				return agent;
+		}
+		return null;
 	}
 	
 	private static String findUnrepairedTarget(String current, Collection<String> disabledAgentPositions) {
-		String target = GraphManager.get().getClosest(current, disabledAgentPositions);
-		if(target != null) repairingTargets.add(target);
+		String target = GraphManager.get().getClosest(current, disabledAgentPositions, repairingTargets);
 		return target;
 	}
 	
 	private static String findUnexploredTarget(String current) {
 		String target = GraphManager.get().getUnvisited(current, exploringTargets);
 		if(target != null) exploringTargets.add(target);
-		if(target == null) System.out.println("No more target to explore..");
 		return target;
 	}
 	
 	private static String findUnprobedTarget(String current) {
 		String target = GraphManager.get().getUnprobed(current, probingTargets);
 		if(target != null) probingTargets.add(target);
-		if(target == null) System.out.println("No more target to probe..");
 		return target;
 	}
 	
 	private static String findUnsurveyedTarget(String current) {
 		String target = GraphManager.get().getUnsurveyed(current, surveyingTargets);
 		if(target != null) surveyingTargets.add(target);
-		if(target == null) System.out.println("No more target to survey..");
 		return target;
+	}
+	
+	// return true if at least half of the team acquired his base node
+	public static boolean teamInBestScore() {
+		return bases.size() >= AgentsController.TEAMSIZE / 2;
 	}
 }

@@ -63,12 +63,13 @@ public class SaboteurBrain extends AgentBrain {
 				if(!Actions.isTypeOf(action, Actions.RECHARGE)) {
 					plan   = plan.isCompleted() ? AgentPlanner.newSurveyingPlan(position) 	 	  : plan;
 					mode   = plan.isCompleted() ? AgentMode.BESTSCORE 						 	  : mode;
-					plan   = plan.isCompleted() ? AgentPlanner.newBestScoringPlan(position, name) : plan;
+					//plan   = plan.isCompleted() ? AgentPlanner.newBestScoringPlan(position, name) : plan;
+					plan   = plan.isCompleted() ? AgentPlanner.newRandomWalkPlan(position)        : plan;
 				}
 				break;
 			case BESTSCORE:
-				action = plan.isCompleted() ? ActionFactory.get().parryOrRecharge(energy) : ActionFactory.get().gotoOrRecharge(energy, position, plan.next());
-				if(plan.isCompleted()) System.out.println(name + " : staying in best score pos");
+				action = plan.isCompleted() ? ActionFactory.get().create(Actions.SKIP) : ActionFactory.get().gotoOrRecharge(energy, position, plan.next());
+				plan   = plan.isCompleted() ? AgentPlanner.newRandomWalkPlan(position) : plan;
 				break;
 		}
 		
@@ -106,7 +107,6 @@ public class SaboteurBrain extends AgentBrain {
 		boolean onSameNode 	= GraphManager.get().edgeCost(getPosition(), position) == 0;
 		boolean nearMe	   	= GraphManager.get().edgeCost(getPosition(), position) == 1;
 		boolean notDisabled = !status.equals("disabled");
-		//boolean isSaboteur  = getRoles().containsKey(id) && getRoles().get(id).equals(AgentTypes.SABOTEUR);
 		
 		if(onSameNode && notDisabled) {
 			targetToAttack = id;
@@ -115,10 +115,6 @@ public class SaboteurBrain extends AgentBrain {
 			targetToFollow = id;
 			followPosition = position;
 		}
-//		else if(isSaboteur && notDisabled) {
-//			targetToAvoid = id;
-//			avoidPosition = position;
-//		}
 	}
 
 	@Override
@@ -126,4 +122,11 @@ public class SaboteurBrain extends AgentBrain {
 		// no action needed
 	}
 	
+//	@Override
+//	protected void abortPlan() {
+//		super.abortPlan();
+//		
+//		targetToAttack = targetToAvoid = targetToFollow = null;
+//		followPosition = avoidPosition = null;
+//	}
 }

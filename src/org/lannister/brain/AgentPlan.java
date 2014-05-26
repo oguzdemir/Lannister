@@ -10,7 +10,7 @@ author = 'Oguz Demir'
 public class AgentPlan {
 	
 	protected enum PlanType {
-		BESTSCORE, EXPLORING, SURVEYING, REPAIRING, PROBING
+		BESTSCORE, EXPLORING, SURVEYING, REPAIRING, PROBING, RANDOMWALK
 	}
 	
 	/**

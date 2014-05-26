@@ -85,6 +85,7 @@ public abstract class Agent {
 			else if(percept.getName().equals(Percepts.POSITION)) {
 				String pos = percept.getParameters().getFirst().toString();
 				brain.setPosition(pos);
+				brain.getPositions().put(name, pos);
 				GraphManager.get().setVisited(pos);
 				brain.getCoordinator().broadcast(Messages.create(getAgentName(), percept));
 			}

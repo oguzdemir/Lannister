@@ -185,35 +185,6 @@ public abstract class AgentBrain {
 		mode = nmode;
 	}
 	
-//	/**
-//	 * Wait until help is received
-//	 */
-//	private void initHelp() {
-//		AgentPlanner.abortPlan(plan);
-//		plan = AgentPlanner.emptyPlan();
-//		updateMode(AgentMode.DEFENDING);
-//		
-//		List<Pair<Integer, String>> costs = new ArrayList<Pair<Integer, String>>();
-//		
-//		for(String agentName : positions.keySet()) {
-//			if(AgentTypes.isTypeOf(agentName, AgentTypes.REPAIRER)) {
-//				Integer cost = GraphManager.get().edgeCost(position, positions.get(agentName));
-//				costs.add(new Pair<Integer, String>(cost, agentName));
-//			}
-//		}
-//		
-//		// find closest
-//		Pair<Integer, String> cost = Ordering.natural().min(costs);
-//		
-//		// send message
-//		String repairerName = cost.second();
-//		coordinator.send(Messages.create(name, new Percept(Percepts.HELP)), repairerName);
-//	}
-	
-//	private void doneHelp() {
-//		revertMode();
-//	}
-	
 	public String getAction() {
 		return action;
 	}
@@ -289,15 +260,6 @@ public abstract class AgentBrain {
 	private boolean sentHelp;
 	
 	public void setHealth(int health) {
-//		if(this.health > health && !sentHelp) {
-//			sentHelp = true;
-//			initHelp();
-//		}
-//		
-//		if(this.health < health && sentHelp) {
-//			sentHelp = false;
-//			doneHelp();
-//		}
 		this.health = health;
 	}
 

@@ -225,9 +225,9 @@ public class Graph {
 		return path.isEmpty() ? null : rr.get(path.getLast());
 	}
 	
-	public String getClosest(String vertex, Collection<String> otherVertices) {
+	public String getClosest(String vertex, Collection<String> from, Collection<String> excluded) {
 		// register target nodes if they are not known by the agent
-		for(String target : otherVertices) {
+		for(String target : from) {
 			if(!isKnown(target)) {
 				register(target);
 			}
@@ -235,7 +235,8 @@ public class Graph {
 		int i 	 = r.get(vertex);
 		int cand = 0;
 		int cost = Integer.MAX_VALUE;
-		for(String otherVertex : otherVertices) {
+		for(String otherVertex : from) {
+			if(excluded.contains(otherVertex)) continue;
 			int j = r.get(otherVertex);
 			cand = d[i][j] < cost ? j 		: cand;
 			cost = d[i][j] < cost ? d[i][j] : cost;
@@ -268,7 +269,7 @@ public class Graph {
 		
 		int i = r.get(pos1);
 		int j = r.get(pos2);
-		int m = MAX_INT;
+		int m = Integer.MAX_VALUE;
 		int r = -1;
 		for(int k = 0; k < cur; k++) {
 			if(d[k][j] > d[i][j] && d[k][i] == 1) {
@@ -277,6 +278,19 @@ public class Graph {
 			}
 		}
 		return r == -1 ? null : rr.get(r);
+	}
+	
+	public String findRandomNode(String pos) {
+		if(!isKnown(pos)) register(pos);
+		
+		int i = r.get(pos);
+		
+		int j = (int) (Math.random() * cur);
+		while(i == j) {
+			j = (int) (Math.random() * cur);
+		}
+		
+		return rr.get(j);
 	}
 	
 	private String findRunawayNodeBFS(String pos1, String pos2) {
@@ -298,12 +312,14 @@ public class Graph {
 		
 		int i = r.get(vertex);
 		if(!v[i]) { visited++; }
+		System.out.println("Visited: " + visited);
 		v[i] = true;
 	}
 	
 	public void setSurveyed(String vertex) {
 		int i = r.get(vertex);
 		if(!s[i]) { surveyed++; }
+		System.out.println("Surveyed: " + surveyed);
 		s[i] = true;
 	}
 	
@@ -323,6 +339,7 @@ public class Graph {
 	
 	public void setProbed(String vertex, Integer weight) {
 		if(!pr.containsKey(vertex)) probed++;
+		System.out.println("Probed: " + probed);
 		pr.put(vertex, weight);
 	}
 	

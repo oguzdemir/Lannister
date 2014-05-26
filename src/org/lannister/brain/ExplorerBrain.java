@@ -59,10 +59,13 @@ public class ExplorerBrain extends AgentBrain {
 				if(!Actions.isTypeOf(action, Actions.RECHARGE)) {
 					plan   = plan.isCompleted() ? AgentPlanner.newProbingPlan(position) 			: plan;
 					mode   = plan.isCompleted() ? AgentMode.BESTSCORE 							  	: mode;
+					mode   = teamInBestScore()  ? AgentMode.BESTSCORE								: mode;
 					plan   = plan.isCompleted() ? AgentPlanner.newBestScoringPlan(position, name) 	: plan;
+					plan   = teamInBestScore()  ? AgentPlanner.newBestScoringPlan(position, name)   : plan;
 				}
 				break;
 			case BESTSCORE:
+				plan   = plan.isCompleted() ? AgentPlanner.newBestScoringPlan(position, name) : plan;
 				action = plan.isCompleted() ? ActionFactory.get().create(Actions.SKIP) : ActionFactory.get().gotoOrRecharge(energy, position, plan.next());
 				if(plan.isCompleted()) System.out.println(name + " : staying in best score pos");
 				break;
@@ -103,5 +106,9 @@ public class ExplorerBrain extends AgentBrain {
 	@Override
 	public void handleWhenFriendSeen(String id, String position, String status) {
 		// do nothing
+	}
+	
+	private boolean teamInBestScore() {
+		return AgentPlanner.teamInBestScore();
 	}
 }

@@ -10,6 +10,8 @@ public class GraphManager {
 	
 	private static LinkedList<String> baseNodes = new LinkedList<String>();
 	
+	private static boolean tokenTaken;
+	
 	public static Graph get() {
 		return graph == null ? graph = new Graph() : graph;
 	}
@@ -28,6 +30,16 @@ public class GraphManager {
 	public static String grabBaseNode() {
 		baseNodes = baseNodes.isEmpty() ? getBaseNodes(AgentsController.TEAMSIZE) : baseNodes;
 		return baseNodes.removeFirst();
+	}
+	
+	public static void resetToken() {
+		tokenTaken = false;
+	}
+	
+	public static boolean acquireToken() {
+		boolean ret = tokenTaken == false;
+		tokenTaken = true;
+		return ret;
 	}
 }
 
