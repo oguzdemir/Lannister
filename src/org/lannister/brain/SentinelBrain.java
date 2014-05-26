@@ -82,7 +82,6 @@ public class SentinelBrain extends AgentBrain {
 			case BESTSCORE:
 				plan   = plan.isCompleted() ? AgentPlanner.newBestScoringPlan(position, name) : plan;
 				action = plan.isCompleted() ? ActionFactory.get().parryOrRecharge(energy) : ActionFactory.get().gotoOrRecharge(energy, position, plan.next());
-				if(plan.isCompleted()) System.out.println(name + " : staying in best score pos");
 				break;
 		}
 		return action;

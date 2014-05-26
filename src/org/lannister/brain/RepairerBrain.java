@@ -198,7 +198,6 @@ public class RepairerBrain extends AgentBrain {
 	
 	@Override
 	protected Action handleDisabledAction() {
-		System.out.println("Checking for disabled agents..");
 		Action action = null;
 		plan   = plan.type != PlanType.REPAIRING ? AgentPlanner.newRepairingPlan(position, getDisabledAgentsPositions()) : plan;
 		action = plan.isCompleted() ? ActionFactory.get().repairOrRecharge(energy, plan.getTargetAgent()) 

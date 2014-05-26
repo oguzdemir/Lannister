@@ -67,7 +67,6 @@ public class ExplorerBrain extends AgentBrain {
 			case BESTSCORE:
 				plan   = plan.isCompleted() ? AgentPlanner.newBestScoringPlan(position, name) : plan;
 				action = plan.isCompleted() ? ActionFactory.get().create(Actions.SKIP) : ActionFactory.get().gotoOrRecharge(energy, position, plan.next());
-				if(plan.isCompleted()) System.out.println(name + " : staying in best score pos");
 				break;
 			default:
 				action = ActionFactory.get().create(Actions.SKIP);

@@ -176,8 +176,6 @@ public class Graph {
 		
 		String res = path.isEmpty() ? null : rr.get(path.getLast());
 		
-		System.out.println(res + " unprobed " + cur);
-		
 		return res;
 	}
 	
@@ -312,14 +310,12 @@ public class Graph {
 		
 		int i = r.get(vertex);
 		if(!v[i]) { visited++; }
-		System.out.println("Visited: " + visited);
 		v[i] = true;
 	}
 	
 	public void setSurveyed(String vertex) {
 		int i = r.get(vertex);
 		if(!s[i]) { surveyed++; }
-		System.out.println("Surveyed: " + surveyed);
 		s[i] = true;
 	}
 	
@@ -339,7 +335,6 @@ public class Graph {
 	
 	public void setProbed(String vertex, Integer weight) {
 		if(!pr.containsKey(vertex)) probed++;
-		System.out.println("Probed: " + probed);
 		pr.put(vertex, weight);
 	}
 	
@@ -351,15 +346,15 @@ public class Graph {
 		return probeValue(rr.get(i));
 	}
 	
-	public LinkedList<String> findBaseNodes(int size) {
+	public LinkedList<String> findBaseNodes(int size, List<String> baseNodesAlready) {
 		
 		// find best vertex to probe
 		int m = 0;
 		int b = -1;
 		for(int i = 0; i < cur; i++) {
-			int score = probeValue(i);
-			for(int j = 0; j < cur; j++) if(d[i][j] == 1) score += probeValue(j);
-			for(int j = 0; j < cur; j++) if(d[i][j] == 2) score += probeValue(j);
+			int score = baseNodesAlready.contains(r.get(i)) ? 0 : probeValue(i);
+			for(int j = 0; j < cur; j++) if(d[i][j] == 1) { score += probeValue(j); score -= baseNodesAlready.contains(r.get(j)) ? probeValue(j) : 0; }
+			for(int j = 0; j < cur; j++) if(d[i][j] == 2) { score += probeValue(j); score -= baseNodesAlready.contains(r.get(j)) ? probeValue(j) : 0; }
 			
 			if(score > m) {
 				m = score;

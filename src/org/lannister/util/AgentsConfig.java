@@ -52,6 +52,6 @@ public class AgentsConfig {
 	}
 	
 	public int getTeamSize() {
-		return configs.size() / 2;
+		return configs.size();
 	}
 }

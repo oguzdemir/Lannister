@@ -1,54 +1,70 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <javaAgentsConfig>
   <agents>
-    <agent name="LannisterExplorer1" entity="connectionA1"  class="org.lannister.agents.Explorer" team="Lannister"/>
-    <agent name="LannisterExplorer2" entity="connectionA2"  class="org.lannister.agents.Explorer" team="Lannister"/>
-    <agent name="LannisterExplorer3" entity="connectionA3"  class="org.lannister.agents.Explorer" team="Lannister"/>
-    <agent name="LannisterExplorer4" entity="connectionA4"  class="org.lannister.agents.Explorer" team="Lannister"/>
-    <agent name="LannisterExplorer5" entity="connectionA5"  class="org.lannister.agents.Explorer" team="Lannister"/>
-    <agent name="LannisterExplorer6" entity="connectionA6"  class="org.lannister.agents.Explorer" team="Lannister"/>
+    <agent name="a1" entity="connectionA1"  class="org.lannister.agents.Explorer" team="A"/>
+    <agent name="a2" entity="connectionA2"  class="org.lannister.agents.Explorer" team="A"/>
+    <agent name="a3" entity="connectionA3"  class="org.lannister.agents.Explorer" team="A"/>
+    <agent name="a4" entity="connectionA4"  class="org.lannister.agents.Explorer" team="A"/>
+    <agent name="a5" entity="connectionA5"  class="org.lannister.agents.Explorer" team="A"/>
+    <agent name="a6" entity="connectionA6"  class="org.lannister.agents.Explorer" team="A"/>
     
-    <agent name="LannisterRepairer1" entity="connectionA7"  class="org.lannister.agents.Repairer" team="Lannister"/>
-    <agent name="LannisterRepairer2" entity="connectionA8"  class="org.lannister.agents.Repairer" team="Lannister"/>
-    <agent name="LannisterRepairer3" entity="connectionA9"  class="org.lannister.agents.Repairer" team="Lannister"/>
-    <agent name="LannisterRepairer4" entity="connectionA10" class="org.lannister.agents.Repairer" team="Lannister"/>
-    <agent name="LannisterRepairer5" entity="connectionA11" class="org.lannister.agents.Repairer" team="Lannister"/>
-    <agent name="LannisterRepairer6" entity="connectionA12" class="org.lannister.agents.Repairer" team="Lannister"/>
+    <agent name="a7" entity="connectionA7"  class="org.lannister.agents.Repairer" team="A"/>
+    <agent name="a8" entity="connectionA8"  class="org.lannister.agents.Repairer" team="A"/>
+    <agent name="a9" entity="connectionA9"  class="org.lannister.agents.Repairer" team="A"/>
+    <agent name="a10" entity="connectionA10" class="org.lannister.agents.Repairer" team="A"/>
+    <agent name="a11" entity="connectionA11" class="org.lannister.agents.Repairer" team="A"/>
+    <agent name="a12" entity="connectionA12" class="org.lannister.agents.Repairer" team="A"/>
     
-    <agent name="LannisterSaboteur1" entity="connectionA13" class="org.lannister.agents.Saboteur" team="Lannister"/>
-    <agent name="LannisterSaboteur2" entity="connectionA14" class="org.lannister.agents.Saboteur" team="Lannister"/>
-    <agent name="LannisterSaboteur3" entity="connectionA15" class="org.lannister.agents.Saboteur" team="Lannister"/>
-    <agent name="LannisterSaboteur4" entity="connectionA16" class="org.lannister.agents.Saboteur" team="Lannister"/>
+    <agent name="a13" entity="connectionA13" class="org.lannister.agents.Saboteur" team="A"/>
+    <agent name="a14" entity="connectionA14" class="org.lannister.agents.Saboteur" team="A"/>
+    <agent name="a15" entity="connectionA15" class="org.lannister.agents.Saboteur" team="A"/>
+    <agent name="a16" entity="connectionA16" class="org.lannister.agents.Saboteur" team="A"/>
     
-    <agent name="LannisterSentinel1" entity="connectionA17" class="org.lannister.agents.Sentinel" team="Lannister"/>
-    <agent name="LannisterSentinel2" entity="connectionA18" class="org.lannister.agents.Sentinel" team="Lannister"/>
-    <agent name="LannisterSentinel3" entity="connectionA19" class="org.lannister.agents.Sentinel" team="Lannister"/>
-    <agent name="LannisterSentinel4" entity="connectionA20" class="org.lannister.agents.Sentinel" team="Lannister"/>
-    <agent name="LannisterSentinel5" entity="connectionA21" class="org.lannister.agents.Sentinel" team="Lannister"/>
-    <agent name="LannisterSentinel6" entity="connectionA22" class="org.lannister.agents.Sentinel" team="Lannister"/>
+    <agent name="a17" entity="connectionA17" class="org.lannister.agents.Sentinel" team="A"/>
+    <agent name="a18" entity="connectionA18" class="org.lannister.agents.Sentinel" team="A"/>
+    <agent name="a19" entity="connectionA19" class="org.lannister.agents.Sentinel" team="A"/>
+    <agent name="a20" entity="connectionA20" class="org.lannister.agents.Sentinel" team="A"/>
+    <agent name="a21" entity="connectionA21" class="org.lannister.agents.Sentinel" team="A"/>
+    <agent name="a22" entity="connectionA22" class="org.lannister.agents.Sentinel" team="A"/>
     
-    <agent name="LannisterInspector1" entity="connectionA23" class="org.lannister.agents.Inspector" team="Lannister"/>
-    <agent name="LannisterInspector2" entity="connectionA24" class="org.lannister.agents.Inspector" team="Lannister"/>
-    <agent name="LannisterInspector3" entity="connectionA25" class="org.lannister.agents.Inspector" team="Lannister"/>
-    <agent name="LannisterInspector4" entity="connectionA26" class="org.lannister.agents.Inspector" team="Lannister"/>
-    <agent name="LannisterInspector5" entity="connectionA27" class="org.lannister.agents.Inspector" team="Lannister"/>
-    <agent name="LannisterInspector6" entity="connectionA28" class="org.lannister.agents.Inspector" team="Lannister"/>
+    <agent name="a23" entity="connectionA23" class="org.lannister.agents.Inspector" team="A"/>
+    <agent name="a24" entity="connectionA24" class="org.lannister.agents.Inspector" team="A"/>
+    <agent name="a25" entity="connectionA25" class="org.lannister.agents.Inspector" team="A"/>
+    <agent name="a26" entity="connectionA26" class="org.lannister.agents.Inspector" team="A"/>
+    <agent name="a27" entity="connectionA27" class="org.lannister.agents.Inspector" team="A"/>
+    <agent name="a28" entity="connectionA28" class="org.lannister.agents.Inspector" team="A"/>
     
-<!--     <agent name="StarkExplorer1" entity="connectionB1"  class="org.lannister.agents.Explorer" team="B"/> -->
-<!--     <agent name="StarkExplorer2" entity="connectionB2"  class="org.lannister.agents.Explorer" team="B"/> -->
-<!--     <agent name="StarkExplorer3" entity="connectionB3"  class="org.lannister.agents.Explorer" team="B"/> -->
-<!--     <agent name="StarkExplorer4" entity="connectionB4"  class="org.lannister.agents.Explorer" team="B"/> -->
-<!--     <agent name="StarkExplorer5" entity="connectionB5"  class="org.lannister.agents.Explorer" team="B"/> -->
-<!--     <agent name="StarkExplorer6" entity="connectionB6"  class="org.lannister.agents.Explorer" team="B"/> -->
-<!--     <agent name="StarkRepairer1" entity="connectionB7"  class="org.lannister.agents.Repairer" team="B"/> -->
-<!--     <agent name="StarkRepairer2" entity="connectionB8"  class="org.lannister.agents.Repairer" team="B"/> -->
-<!--     <agent name="StarkRepairer3" entity="connectionB9"  class="org.lannister.agents.Repairer" team="B"/> -->
-<!--     <agent name="StarkRepairer4" entity="connectionB10" class="org.lannister.agents.Repairer" team="B"/> -->
-<!--     <agent name="StarkRepairer5" entity="connectionB11" class="org.lannister.agents.Repairer" team="B"/> -->
-<!--     <agent name="StarkRepairer6" entity="connectionB12" class="org.lannister.agents.Repairer" team="B"/> -->
-<!--     <agent name="StarkSaboteur1" entity="connectionB13" class="org.lannister.agents.Saboteur" team="B"/> -->
-<!--     <agent name="StarkSaboteur2" entity="connectionB14" class="org.lannister.agents.Saboteur" team="B"/> -->
-<!--     <agent name="StarkSaboteur3" entity="connectionB15" class="org.lannister.agents.Saboteur" team="B"/> -->
-<!--     <agent name="StarkSaboteur4" entity="connectionB16" class="org.lannister.agents.Saboteur" team="B"/> -->
+<!-- 	<agent name="b1" entity="connectionB1"  class="org.lannister.agents.Explorer" team="B"/> -->
+<!--     <agent name="b2" entity="connectionB2"  class="org.lannister.agents.Explorer" team="B"/> -->
+<!--     <agent name="b3" entity="connectionB3"  class="org.lannister.agents.Explorer" team="B"/> -->
+<!--     <agent name="b4" entity="connectionB4"  class="org.lannister.agents.Explorer" team="B"/> -->
+<!--     <agent name="b5" entity="connectionB5"  class="org.lannister.agents.Explorer" team="B"/> -->
+<!--     <agent name="b6" entity="connectionB6"  class="org.lannister.agents.Explorer" team="B"/> -->
+    
+<!--     <agent name="b7" entity="connectionB7"  class="org.lannister.agents.Repairer" team="B"/> -->
+<!--     <agent name="b8" entity="connectionB8"  class="org.lannister.agents.Repairer" team="B"/> -->
+<!--     <agent name="b9" entity="connectionB9"  class="org.lannister.agents.Repairer" team="B"/> -->
+<!--     <agent name="b10" entity="connectionB10" class="org.lannister.agents.Repairer" team="B"/> -->
+<!--     <agent name="b11" entity="connectionB11" class="org.lannister.agents.Repairer" team="B"/> -->
+<!--     <agent name="b12" entity="connectionB12" class="org.lannister.agents.Repairer" team="B"/> -->
+    
+<!--     <agent name="b13" entity="connectionB13" class="org.lannister.agents.Saboteur" team="B"/> -->
+<!--     <agent name="b14" entity="connectionB14" class="org.lannister.agents.Saboteur" team="B"/> -->
+<!--     <agent name="b15" entity="connectionB15" class="org.lannister.agents.Saboteur" team="B"/> -->
+<!--     <agent name="b16" entity="connectionB16" class="org.lannister.agents.Saboteur" team="B"/> -->
+    
+<!--     <agent name="b17" entity="connectionB17" class="org.lannister.agents.Sentinel" team="B"/> -->
+<!--     <agent name="b18" entity="connectionB18" class="org.lannister.agents.Sentinel" team="B"/> -->
+<!--     <agent name="b19" entity="connectionB19" class="org.lannister.agents.Sentinel" team="B"/> -->
+<!--     <agent name="b20" entity="connectionB20" class="org.lannister.agents.Sentinel" team="B"/> -->
+<!--     <agent name="b21" entity="connectionB21" class="org.lannister.agents.Sentinel" team="B"/> -->
+<!--     <agent name="b22" entity="connectionB22" class="org.lannister.agents.Sentinel" team="B"/> -->
+    
+<!--     <agent name="b23" entity="connectionA23" class="org.lannister.agents.Inspector" team="B"/> -->
+<!--     <agent name="b24" entity="connectionA24" class="org.lannister.agents.Inspector" team="B"/> -->
+<!--     <agent name="b25" entity="connectionA25" class="org.lannister.agents.Inspector" team="B"/> -->
+<!--     <agent name="b26" entity="connectionA26" class="org.lannister.agents.Inspector" team="B"/> -->
+<!--     <agent name="b27" entity="connectionA27" class="org.lannister.agents.Inspector" team="B"/> -->
+<!--     <agent name="b28" entity="connectionA28" class="org.lannister.agents.Inspector" team="B"/> -->
   </agents>
 </javaAgentsConfig>

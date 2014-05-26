@@ -1,25 +1,16 @@
 package org.lannister.brain;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import org.lannister.action.Actions;
 import org.lannister.agents.AgentMode;
-import org.lannister.agents.AgentTypes;
 import org.lannister.brain.AgentPlan.PlanType;
 import org.lannister.graph.GraphManager;
 import org.lannister.messaging.AgentsCoordinator;
-import org.lannister.messaging.Messages;
-import org.lannister.util.Pair;
-import org.lannister.util.Percepts;
-
-import com.google.common.collect.Ordering;
 
 import eis.iilang.Action;
-import eis.iilang.Percept;
 
 /**
 author = 'Oguz Demir'

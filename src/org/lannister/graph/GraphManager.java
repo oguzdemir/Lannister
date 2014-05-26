@@ -8,8 +8,8 @@ public class GraphManager {
 	
 	private static Graph graph;
 	
-	private static LinkedList<String> baseNodes = new LinkedList<String>();
-	
+	private static LinkedList<String> baseNodes 	= new LinkedList<String>();
+	private static LinkedList<String> baseNodesHist = new LinkedList<String>();
 	private static boolean tokenTaken;
 	
 	public static Graph get() {
@@ -22,8 +22,10 @@ public class GraphManager {
 		}
 		
 		// update base nodes
-		baseNodes = graph.findBaseNodes(size);
+		baseNodes = graph.findBaseNodes(size / 2, baseNodesHist);
+		baseNodesHist.addAll(baseNodes);
 		System.out.println("BASE NODES ARE FOUND: " + baseNodes);
+		System.out.println("BASE NODE HISTORY: " + baseNodesHist);
 		return baseNodes;
 	}
 	
